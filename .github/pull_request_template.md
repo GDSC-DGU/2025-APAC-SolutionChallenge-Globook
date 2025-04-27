@@ -1,11 +1,3 @@
----
-name: "Pull Request"
-about: "Submit a pull request"
-title: "[PR] - "
-labels: ''
-assignees: ''
----
-
 ## Related Issues
 Link the issues this PR resolves.
 
