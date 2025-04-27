@@ -1,14 +1,30 @@
 ---
-name: "[  Bug ] - Bug report"
-about: "❗ Bug Template"
-title: "[ Bug ] - "
-labels: bug ❗
+name: "[Bug] Bug Report"
+about: "❗ Report a bug"
+title: "[Bug] - "
+labels: "bug ❗"
 assignees: ''
-
 ---
 
-## 🛠️ 발견된 버그 기능
-어떤 부분에서 버그가 나오는지 적습니다.
+## 🛠️ Affected Feature
+Describe where the bug occurs.
 
-## 🌎 발견된 환경
-어떤 환경에서 버그가 나오는지 적습니다.
+## 🌎 Environment
+Specify the environment where the bug was found (e.g., OS, browser, device).
+
+## 📝 Steps to Reproduce
+1. 
+2. 
+3. 
+
+## 📝 Expected Behavior
+Describe what you expected to happen.
+
+## 📝 Actual Behavior
+Describe what actually happened.
+
+## 📝 Additional Notes
+Add any other information, screenshots, or logs here.
+
+## ✅ Checklist
+- [ ]

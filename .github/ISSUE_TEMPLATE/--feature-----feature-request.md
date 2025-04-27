@@ -1,20 +1,19 @@
 ---
-name: "[ Feature ] - Feature request"
-about: "✨ Feature Template "
-title: "[ Feature ] - "
-labels: feature ✨
+name: "[Feature] Feature Request"
+about: "✨ Suggest a new feature"
+title: "[Feature] - "
+labels: "feature ✨"
 assignees: ''
-
 ---
 
-## 🛠️ 계획된 개발 기능
-어떠한 기능 / 화면을 만드는지 적습니다.
+## 🛠️ Planned Feature
+Describe the feature or screen you plan to develop.
 
-## 🛠 기능 구현 세부사항
-해당 기능들이 요구하는 사항 등을 적습니다.
+## 📝 Feature Details
+List the specific requirements or details for this feature.
 
-## 🛠 참고사항
-해당 기능들에 있어 특이사항을 적습니다.
+## 📝 Additional Notes
+Include any special considerations or notes for this feature.
 
-## 📝 check-lists
+## ✅ Checklist
 - [ ]

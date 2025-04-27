@@ -1,12 +1,30 @@
-## 관련 이슈
-해결한 문제를 지정하는 Issue Index에 연결해야 합니다.
+---
+name: "Pull Request"
+about: "Submit a pull request"
+title: "[PR] - "
+labels: ''
+assignees: ''
+---
 
-- Resolves : 
- 
-## 작업 사항
-해당 Pull Request에서 수행한 작업 목록을 제시해야 합니다.
+## Related Issues
+Link the issues this PR resolves.
+
+- Resolves: 
+
+## Description
+Describe the changes made in this pull request.
+
+## Tasks
+List the tasks completed in this PR.
 
 - 
 
-## 참고 사항
-기능을 만들 때 생긴 이슈에 대해서 다른사람들이 참고해야 할 사항을 적습니다.
+## Additional Notes
+Add any notes or considerations for reviewers.
+
+## ✅ Checklist
+- [ ] My code follows the project’s coding style
+- [ ] I have performed a self-review of my code
+- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] I have added necessary documentation (if appropriate)
+- [ ] Any dependent changes have been merged and published in downstream modules
