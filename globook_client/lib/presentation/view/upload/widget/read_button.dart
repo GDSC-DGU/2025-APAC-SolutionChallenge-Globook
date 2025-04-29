@@ -9,7 +9,6 @@ class ReadFileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 80,
       height: 28,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -22,7 +21,7 @@ class ReadFileButton extends StatelessWidget {
           Icon(Icons.library_books_rounded, size: 16, color: Colors.white),
           SizedBox(width: 12),
           Text(
-            '읽기',
+            'Read',
             style: TextStyle(
               color: Colors.white,
               fontSize: 12,

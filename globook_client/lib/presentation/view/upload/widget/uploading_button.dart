@@ -7,7 +7,6 @@ class UploadingStatusWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 85,
       height: 28,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -20,14 +19,14 @@ class UploadingStatusWidget extends StatelessWidget {
           SizedBox(
             width: 16,
             height: 16,
-            child: CircularProgressIndicator(
+          child: CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
             ),
           ),
           SizedBox(width: 8),
           Text(
-            '업로드 중',
+            'Uploading',
             style: TextStyle(
               color: Colors.white,
               fontSize: 10,

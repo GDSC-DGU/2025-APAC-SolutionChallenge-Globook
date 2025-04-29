@@ -20,7 +20,7 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
           _buildSearchBar(),
           const SizedBox(height: 32),
           const Text(
-            '파일 추가하기',
+            'Add File',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -48,7 +48,7 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
           viewModel.searchFiles(value);
         },
         decoration: const InputDecoration(
-          hintText: '업로드한 파일명을 검색해보세요',
+          hintText: 'Search uploaded files',
           hintStyle: TextStyle(
             color: ColorSystem.lightText,
             fontSize: 14,
@@ -108,7 +108,7 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
         },
         icon: const Icon(Icons.upload_file, color: Colors.white),
         label: const Text(
-          '업로드',
+          'Upload',
           style: TextStyle(color: Colors.white, fontSize: 16),
         ),
         style: ElevatedButton.styleFrom(

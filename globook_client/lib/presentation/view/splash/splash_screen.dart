@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:globook_client/app/config/app_routes.dart';
+import 'package:globook_client/app/config/color_system.dart';
 import 'package:globook_client/presentation/view_model/root/root_binding.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -18,16 +19,7 @@ class SplashScreen extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFFFFFFFF),
-              Color.fromARGB(255, 210, 219, 242),
-            ],
-          ),
-        ),
+        decoration: GradientSystem.gradient1,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
