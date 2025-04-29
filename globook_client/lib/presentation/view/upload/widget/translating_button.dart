@@ -7,7 +7,6 @@ class TranslatingStatusWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 80,
       height: 28,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
@@ -20,7 +19,7 @@ class TranslatingStatusWidget extends StatelessWidget {
           Icon(Icons.translate, size: 16, color: Colors.white),
           SizedBox(width: 8),
           Text(
-            '번역 중',
+            'Translating',
             style: TextStyle(
               color: Colors.white,
               fontSize: 10,
