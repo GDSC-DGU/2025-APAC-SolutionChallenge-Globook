@@ -12,6 +12,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  # File Picker
+  file_picker: ^8.1.2
+
   cupertino_icons: ^1.0.6
 
   # gRPC communication
@@ -36,6 +39,9 @@ dependencies:
   # Encryption for Server URL / GCP, Firebase Key
   envied: ^1.1.1
 
+  # SVG 이미지 렌더링
+  flutter_svg: ^2.0.10+1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -45,9 +51,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # assets:
-  # - images/a_dot_burr.jpeg
-  # - images/a_dot_ham.jpeg
+  assets:
+    - assets/icons/
+    - assets/icons/svg/
+    - assets/icons/png/
 
   fonts:
     - family: Inter
