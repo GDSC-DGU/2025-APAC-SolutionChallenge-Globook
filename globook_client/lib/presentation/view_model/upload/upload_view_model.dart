@@ -80,18 +80,17 @@ class UploadViewModel extends GetxController {
 
   void uploadFile() async {
     _isUploading.value = true;
-    // 파일 업로드 로직
-    // ...
-    await Future.delayed(const Duration(seconds: 2)); // 업로드 시뮬레이션
-    _isUploading.value = false;
+    // file picker
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf', 'doc', 'docx', 'hwp'],
+    );
 
-    // 업로드 성공 후 목록에 추가
-    _uploadedFiles.insert(0, {
-      'fileName': '새파일.pdf',
-      'fileType': 'pdf',
-      'uploadTime': '방금',
-      'status': '업로드 중'
-    });
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      // 파일 업로드 로직
+      // uploadFileToServer(file);
+    }
   }
 
   void readFile(Map<String, dynamic> file) {
