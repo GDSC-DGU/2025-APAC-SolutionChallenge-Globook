@@ -2,6 +2,7 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selection_modal.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selector.dart';
 
@@ -9,6 +10,9 @@ class HomeViewModel extends GetxController {
   /* ------------------------------------------------------ */
   /* ----------------- Static Fields ---------------------- */
   /* ------------------------------------------------------ */
+  static const String _sourceLanguageKey = 'source_language';
+  static const String _targetLanguageKey = 'target_language';
+
   final List<Language> availableLanguages = [
     const Language(code: 'ENG', name: 'English'),
     const Language(code: 'KOR', name: '한국어'),
@@ -52,8 +56,36 @@ class HomeViewModel extends GetxController {
     // Dependency Injection
     // _bookUseCase = Get.find<BookUseCase>();
 
+    // 저장된 언어 설정 불러오기
+    await _loadLanguageSettings();
+
     // 초기 데이터 로드
     loadBooks();
+  }
+
+  Future<void> _loadLanguageSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final sourceCode = prefs.getString(_sourceLanguageKey) ?? 'ENG';
+    final targetCode = prefs.getString(_targetLanguageKey) ?? 'KOR';
+
+    _selectedSourceLanguage.value = _findLanguageByCode(sourceCode);
+    _selectedTargetLanguage.value = _findLanguageByCode(targetCode);
+  }
+
+  Future<void> _saveLanguageSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        _sourceLanguageKey, _selectedSourceLanguage.value.code);
+    await prefs.setString(
+        _targetLanguageKey, _selectedTargetLanguage.value.code);
+  }
+
+  Language _findLanguageByCode(String code) {
+    return availableLanguages.firstWhere(
+      (lang) => lang.code == code,
+      orElse: () => availableLanguages.first,
+    );
   }
 
   void loadBooks() async {
@@ -86,10 +118,12 @@ class HomeViewModel extends GetxController {
 
   void updateSourceLanguage(Language language) {
     _selectedSourceLanguage.value = language;
+    _saveLanguageSettings();
   }
 
   void updateTargetLanguage(Language language) {
     _selectedTargetLanguage.value = language;
+    _saveLanguageSettings();
   }
 
   void showLanguageSelectionModal() {

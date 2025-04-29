@@ -41,6 +41,7 @@ dependencies:
 
   # SVG 이미지 렌더링
   flutter_svg: ^2.0.10+1
+  shared_preferences: ^2.3.3
 
 dev_dependencies:
   flutter_test:
