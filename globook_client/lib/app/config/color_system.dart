@@ -15,3 +15,16 @@ abstract class ColorSystem {
   static const load1 = Color(0xFF1B233C);
   static const load2 = Color(0xFF001F77);
 }
+
+abstract class GradientSystem {
+  static BoxDecoration get gradient1 => const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color(0xFFFFFFFF),
+            Color.fromARGB(255, 227, 233, 250),
+          ],
+        ),
+      );
+}
