@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:globook_client/app/config/color_system.dart';
 import 'package:globook_client/core/view/base_screen.dart';
+import 'package:globook_client/domain/model/file.dart';
 import 'package:globook_client/presentation/view/upload/widget/file_extension_icon.dart';
 import 'package:globook_client/presentation/view/upload/widget/file_information.dart';
 import 'package:globook_client/presentation/view/upload/widget/file_status_button.dart';
 import 'package:globook_client/presentation/view_model/upload/upload_view_model.dart';
+import 'package:globook_client/presentation/widget/search_field.dart';
 
 class UploadScreen extends BaseScreen<UploadViewModel> {
   const UploadScreen({super.key});
@@ -17,7 +19,12 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          _buildSearchBar(),
+          SearchField(
+            hintText: 'Search uploaded files',
+            onChanged: (value) {
+              viewModel.searchFiles(value);
+            },
+          ),
           const SizedBox(height: 32),
           const Text(
             'Add File',
@@ -27,54 +34,29 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
             ),
           ),
           const SizedBox(height: 16),
-          Expanded(
-            child: _buildFileList(),
-          ),
+          _buildFileList(),
           _buildUploadButton(),
         ],
       ),
     );
   }
 
-  Widget _buildSearchBar() {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: const Color(0xFFF1F1F1),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: TextField(
-        onChanged: (value) {
-          viewModel.searchFiles(value);
-        },
-        decoration: const InputDecoration(
-          hintText: 'Search uploaded files',
-          hintStyle: TextStyle(
-            color: ColorSystem.lightText,
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(Icons.search, color: ColorSystem.lightText),
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-        ),
-      ),
-    );
-  }
-
   Widget _buildFileList() {
-    return Obx(() => ListView.builder(
-          itemCount: viewModel.uploadedFiles.length,
-          itemBuilder: (context, index) {
-            final file = viewModel.uploadedFiles[index];
-            return _buildFileItem(file);
-          },
+    return Obx(() => Expanded(
+          child: ListView.builder(
+            itemCount: viewModel.uploadedFiles.length,
+            itemBuilder: (context, index) {
+              final file = viewModel.uploadedFiles[index];
+              return _buildFileItem(file);
+            },
+          ),
         ));
   }
 
-  Widget _buildFileItem(Map<String, dynamic> file) {
+  Widget _buildFileItem(UserFile file) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),

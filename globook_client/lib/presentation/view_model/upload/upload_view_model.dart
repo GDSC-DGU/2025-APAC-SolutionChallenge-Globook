@@ -1,8 +1,9 @@
 // lib/presentation/view_model/upload/upload_view_model.dart
 import 'dart:core';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart' as picker;
 import 'package:get/get.dart';
 import 'dart:io';
+import 'package:globook_client/domain/model/file.dart';
 
 class UploadViewModel extends GetxController {
   /* ------------------------------------------------------ */
@@ -17,15 +18,14 @@ class UploadViewModel extends GetxController {
   /* ------------------------------------------------------ */
   /* ----------------- Private Fields --------------------- */
   /* ------------------------------------------------------ */
-  final RxList<Map<String, dynamic>> _uploadedFiles =
-      RxList<Map<String, dynamic>>([]);
+  final RxList<UserFile> _uploadedFiles = RxList<UserFile>();
   final RxBool _isUploading = RxBool(false);
   final RxString _searchQuery = RxString('');
 
   /* ------------------------------------------------------ */
   /* ----------------- Public Fields ---------------------- */
   /* ------------------------------------------------------ */
-  List<Map<String, dynamic>> get uploadedFiles => _uploadedFiles;
+  List<UserFile> get uploadedFiles => _uploadedFiles;
   bool get isUploading => _isUploading.value;
   String get searchQuery => _searchQuery.value;
 
@@ -36,76 +36,102 @@ class UploadViewModel extends GetxController {
     // _uploadUseCase = Get.find<UploadUseCase>();
 
     // 초기 데이터 로드
-    loadUploadedFiles();
+    loadFiles();
   }
 
-  void loadUploadedFiles() {
-    // 예시 데이터
-    _uploadedFiles.addAll([
-      {
-        'fileName': '파일명.hwp',
-        'fileType': 'hwp',
-        'uploadTime': '오늘',
-        'status': '업로드 중'
-      },
-      {
-        'fileName': '파일명.pdf',
-        'fileType': 'pdf',
-        'uploadTime': '어제',
-        'status': '번역 중'
-      },
-      {
-        'fileName': '파일명.pdf',
-        'fileType': 'pdf',
-        'uploadTime': '4/1',
-        'status': '완료',
-        'pages': 1
-      },
-      {
-        'fileName': '파일명.pdf',
-        'fileType': 'pdf',
-        'uploadTime': '4/1',
-        'status': '완료',
-        'pages': 1
-      },
-      {
-        'fileName': '파일명.pdf',
-        'fileType': 'pdf',
-        'uploadTime': '4/1',
-        'status': '완료',
-        'pages': 1
-      }
-    ]);
+  void loadFiles() async {
+    // TODO: API 호출로 업로드된 파일 목록을 가져옵니다
+    await Future.delayed(const Duration(milliseconds: 500)); // 임시 딜레이
+
+    // 임시 데이터
+    _uploadedFiles.value = [
+      UserFile(
+        id: '1',
+        name: 'Policy.pdf',
+        previewUrl: 'https://example.com/preview1.jpg',
+        fileUrl: 'https://example.com/file1.pdf',
+        fileType: FileType.pdf,
+        uploadedAt: DateTime.now(),
+        status: FileStatus.uploading,
+      ),
+      UserFile(
+        id: '2',
+        name: 'Terms.pdf',
+        previewUrl: 'https://example.com/preview2.jpg',
+        fileUrl: 'https://example.com/file2.pdf',
+        fileType: FileType.pdf,
+        uploadedAt: DateTime.now(),
+        status: FileStatus.translating,
+      ),
+      UserFile(
+        id: '3',
+        name: 'Privacy.pdf',
+        previewUrl: 'https://example.com/preview3.jpg',
+        fileUrl: 'https://example.com/file3.pdf',
+        fileType: FileType.pdf,
+        uploadedAt: DateTime.now(),
+        status: FileStatus.completed,
+      ),
+    ];
+  }
+
+  void searchFiles(String query) {
+    if (query.isEmpty) {
+      loadFiles();
+      return;
+    }
+
+    final lowercaseQuery = query.toLowerCase();
+    final filteredFiles = _uploadedFiles
+        .where((file) => file.name.toLowerCase().contains(lowercaseQuery))
+        .toList();
+
+    _uploadedFiles.value = filteredFiles;
   }
 
   void uploadFile() async {
     _isUploading.value = true;
-    // file picker
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx', 'hwp'],
-    );
+    try {
+      final result = await picker.FilePicker.platform.pickFiles(
+        type: picker.FileType.custom,
+        allowedExtensions: ['pdf', 'doc', 'docx'],
+      );
 
-    if (result != null) {
-      File file = File(result.files.single.path!);
-      // 파일 업로드 로직
-      // uploadFileToServer(file);
+      if (result != null) {
+        final file = File(result.files.single.path!);
+        // TODO: 실제 파일 업로드 구현
+        print('Selected file: ${file.path}');
+
+        // 임시로 업로드된 파일 추가
+        _uploadedFiles.add(UserFile(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          name: result.files.single.name,
+          previewUrl: 'https://example.com/preview.jpg',
+          fileUrl: file.path,
+          fileType: FileType.pdf,
+          uploadedAt: DateTime.now(),
+          status: FileStatus.uploading,
+        ));
+      }
+    } catch (e) {
+      print('Error picking file: $e');
+    } finally {
+      _isUploading.value = false;
     }
   }
 
-  void readFile(Map<String, dynamic> file) {
-    // 파일 읽기 화면으로 이동
-    print('Reading file: ${file['fileName']}');
-  }
-
-  void searchFiles(String query) {
-    _searchQuery.value = query;
-    // 검색 로직 구현
+  void readFile(UserFile file) {
+    if (file.status != FileStatus.completed) {
+      return;
+    }
+    // TODO: 파일 읽기 구현
+    print('Reading file: ${file.name}');
   }
 
   Future<void> pickAndUploadFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
+    picker.FilePickerResult? result =
+        await picker.FilePicker.platform.pickFiles(
+      type: picker.FileType.custom,
       allowedExtensions: ['pdf', 'doc', 'docx', 'hwp'],
     );
 

@@ -1,26 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:globook_client/core/view/base_widget.dart';
-import 'package:globook_client/presentation/view/upload/widget/read_button.dart';
-import 'package:globook_client/presentation/view/upload/widget/translating_button.dart';
-import 'package:globook_client/presentation/view/upload/widget/uploading_button.dart';
-import 'package:globook_client/presentation/view_model/upload/upload_view_model.dart';
+import 'package:globook_client/app/config/color_system.dart';
+import 'package:globook_client/domain/model/file.dart';
+import 'package:globook_client/presentation/widget/styled_button.dart';
 
-class FileStatusButton extends BaseWidget<UploadViewModel> {
-  final Map<String, dynamic> file;
+class FileStatusButton extends StatelessWidget {
+  final UserFile file;
 
-  const FileStatusButton({super.key, required this.file});
+  const FileStatusButton({
+    super.key,
+    required this.file,
+  });
 
   @override
-  Widget buildView(BuildContext context) {
-    return switch (file['status']) {
-      '업로드 중' => const UploadingStatusWidget(),
-      '번역 중' => const TranslatingStatusWidget(),
-      '완료' => ReadFileButton(
+  Widget build(BuildContext context) {
+    return _buildButton();
+  }
+
+  Widget _buildButton() {
+    switch (file.status) {
+      case FileStatus.uploading:
+        return StyledButton(
+          height: 32,
+          onPressed: () {},
+          text: 'uploading',
+          icon: const SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(
+              color: ColorSystem.white,
+              strokeWidth: 2,
+            ),
+          ),
+          textColor: ColorSystem.white,
+          fontSize: 10,
+          backgroundColor: ColorSystem.lightText,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        );
+      case FileStatus.translating:
+        return StyledButton(
+          onPressed: () {},
+          text: 'translating',
+          height: 28,
+          textColor: ColorSystem.white,
+          fontSize: 10,
+          icon: const Icon(Icons.translate_rounded,
+              color: ColorSystem.white, size: 16),
+          backgroundColor: ColorSystem.load2,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        );
+      case FileStatus.completed:
+        return StyledButton(
           onPressed: () {
-            viewModel.readFile(file);
+            // TODO: 파일 읽기 구현
           },
-        ),
-      _ => const SizedBox(),
-    };
+          text: 'read',
+          height: 28,
+          textColor: ColorSystem.white,
+          fontSize: 10,
+          icon: const Icon(Icons.library_books_rounded,
+              color: ColorSystem.white, size: 16),
+          backgroundColor: ColorSystem.highlight,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        );
+    }
   }
 }
