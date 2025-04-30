@@ -42,14 +42,18 @@ class LoginScreen extends BaseScreen<LoginViewModel> {
             onPressed: () {
               viewModel.login();
             },
-            text: 'Login',
+            height: 60,
+            borderRadius: 20,
             width: double.infinity,
+            text: 'Login',
           ),
           const SizedBox(height: 20),
           StyledButton(
               onPressed: () {
                 viewModel.login();
               },
+              height: 60,
+              borderRadius: 20,
               width: double.infinity,
               text: 'Sign Up',
               backgroundColor: ColorSystem.load2),
@@ -59,6 +63,8 @@ class LoginScreen extends BaseScreen<LoginViewModel> {
               viewModel.login();
             },
             width: double.infinity,
+            height: 60,
+            borderRadius: 20,
             icon: SvgPicture.asset('assets/icons/svg/google-logo.svg',
                 width: 24, height: 24),
             text: 'Login with Google',

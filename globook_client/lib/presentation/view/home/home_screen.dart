@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/app/config/color_system.dart';
 import 'package:globook_client/core/view/base_screen.dart';
-import 'package:globook_client/presentation/view/home/widget/current_book.dart';
+import 'package:globook_client/presentation/widget/category_books.dart';
+import 'package:globook_client/presentation/widget/current_book.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selector.dart';
-import 'package:globook_client/presentation/view/home/widget/recommended_books.dart';
+  
 import 'package:globook_client/presentation/view_model/home/home_view_model.dart';
 import 'package:globook_client/presentation/widget/styled_button.dart';
 import 'package:get/get.dart';
@@ -39,26 +41,14 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
                 //TODO-[API connection]
                 _buildContinueReadingButton(),
                 const SizedBox(height: 40),
-                RecommendedBooksWidget(
-                  books: const [
-                    RecommendedBook(
-                      imageUrl: 'assets/images/recommended_book.png',
-                      title: 'The Great Gatsby',
-                      author: 'F. Scott Fitzgerald',
-                    ),
-                    RecommendedBook(
-                      imageUrl: 'assets/images/recommended_book.png',
-                      title: 'The Great Gatsby',
-                      author: 'F. Scott Fitzgerald',
-                    ),
-                    RecommendedBook(
-                      imageUrl: 'assets/images/recommended_book.png',
-                      title: 'The Great Gatsby',
-                      author: 'F. Scott Fitzgerald',
-                    ),
-                  ],
-                  onViewAllPressed: () => print('모든 추천 책 보기 페이지로 이동'),
-                  onBookPressed: (book) => print('책 상세 페이지로 이동'),
+                CategoryBooks(
+                  title: 'Another Books in Your Library',
+                  books: viewModel.anotherBooks,
+                  onViewAllPressed: () {},
+                  onBookPressed: (book) {
+                    Get.toNamed(AppRoutes.BOOK_STORE_DETAIL,
+                        arguments: book.id);
+                  },
                 ),
               ],
             ),

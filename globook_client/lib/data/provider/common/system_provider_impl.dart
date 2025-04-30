@@ -1,5 +1,4 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:globook_client/data/provider/common/system_provider.dart';
 
 class SystemProviderImpl implements SystemProvider {
