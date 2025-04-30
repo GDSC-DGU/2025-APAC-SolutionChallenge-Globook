@@ -6,7 +6,13 @@ class StyledButton extends StatelessWidget {
   final String text;
   final Widget? icon;
   final Color? backgroundColor;
-  final double? width; 
+  final double? width;
+  final double? height;
+  final Color? textColor;
+  final double? fontSize;
+  final double? borderRadius;
+  final bool isDisabled;
+  final EdgeInsetsGeometry? padding;
 
   const StyledButton({
     super.key,
@@ -14,32 +20,46 @@ class StyledButton extends StatelessWidget {
     required this.text,
     this.backgroundColor = ColorSystem.highlight,
     this.icon,
-    this.width, 
+    this.width,
+    this.height,
+    this.textColor,
+    this.fontSize,
+    this.borderRadius = 8,
+    this.isDisabled = false,
+    this.padding,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width, // if it is null, it will be the content width
-      height: 60,
+      width: width,
+      height: height,
       child: ElevatedButton(
-        onPressed: onPressed,
+        onPressed: isDisabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: Colors.white,
+          padding: padding ??
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: Size.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(borderRadius ?? 8),
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min, // 이거 꼭!
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) icon!,
             if (icon != null) const SizedBox(width: 10),
             Text(
               text,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+              ),
             ),
           ],
         ),
