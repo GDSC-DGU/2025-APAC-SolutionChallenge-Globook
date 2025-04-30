@@ -5,4 +5,7 @@ abstract class AppRoutes {
   static const String ROOT = '/root';
   static const String SPLASH = '/splash';
   static const String HOME = '/home';
+  static const String BOOK_STORE = '/book-store';
+  static const String BOOK_STORE_DETAIL = '/book-store-detail/:bookId';
+  static const String GENRE_BOOKS = '/genre-books/:genreId';
 }

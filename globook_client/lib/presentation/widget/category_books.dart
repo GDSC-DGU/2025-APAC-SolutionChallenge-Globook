@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:globook_client/app/config/color_system.dart';
+import 'package:globook_client/domain/model/book.dart';
 
-class RecommendedBook {
-  final String imageUrl;
+class CategoryBooks extends StatelessWidget {
   final String title;
-  final String author;
-
-  const RecommendedBook({
-    required this.imageUrl,
-    required this.title,
-    required this.author,
-  });
-}
-
-class RecommendedBooksWidget extends StatelessWidget {
-  final List<RecommendedBook> books;
+  final List<Book> books;
   final VoidCallback onViewAllPressed;
-  final Function(RecommendedBook book) onBookPressed;
+  final Function(Book book) onBookPressed;
+  final double height;
+  final double itemWidth;
+  final double itemHeight;
+  final double itemSpacing;
+  final bool showAuthor;
 
-  const RecommendedBooksWidget({
+  const CategoryBooks({
     super.key,
+    required this.title,
     required this.books,
     required this.onViewAllPressed,
     required this.onBookPressed,
+    this.height = 200,
+    this.itemWidth = 120,
+    this.itemHeight = 150,
+    this.itemSpacing = 16,
+    this.showAuthor = true,
   });
 
   @override
@@ -59,9 +60,9 @@ class RecommendedBooksWidget extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          'Another Books in Your Library',
-          style: TextStyle(
+        Text(
+          title,
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -76,7 +77,7 @@ class RecommendedBooksWidget extends StatelessWidget {
 
   Widget _buildBookList() {
     return SizedBox(
-      height: 200,
+      height: height,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: books.length,
@@ -88,12 +89,12 @@ class RecommendedBooksWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildBookItem(RecommendedBook book) {
+  Widget _buildBookItem(Book book) {
     return GestureDetector(
       onTap: () => onBookPressed(book),
       child: Container(
-        width: 120,
-        margin: const EdgeInsets.only(right: 16),
+        width: itemWidth,
+        margin: EdgeInsets.only(right: itemSpacing),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -106,9 +107,9 @@ class RecommendedBooksWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildBookCover(RecommendedBook book) {
+  Widget _buildBookCover(Book book) {
     return Container(
-      height: 150,
+      height: itemHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         image: DecorationImage(
@@ -126,7 +127,7 @@ class RecommendedBooksWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildBookInfo(RecommendedBook book) {
+  Widget _buildBookInfo(Book book) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -139,15 +140,18 @@ class RecommendedBooksWidget extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
-        Text(
-          book.author,
-          style: const TextStyle(
-            fontSize: 10,
-            color: ColorSystem.lightText,
+        if (showAuthor) ...[
+          const SizedBox(height: 2),
+          Text(
+            book.author,
+            style: const TextStyle(
+              fontSize: 10,
+              color: ColorSystem.lightText,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
+        ],
       ],
     );
   }

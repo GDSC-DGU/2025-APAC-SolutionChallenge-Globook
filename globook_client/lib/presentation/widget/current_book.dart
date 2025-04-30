@@ -5,14 +5,14 @@ class CurrentBook extends StatelessWidget {
   final String imageUrl;
   final String title;
   final String author;
-  final double progress; // 0.0 ~ 1.0
+  final double? progress; // 0.0 ~ 1.0
 
   const CurrentBook({
     super.key,
     required this.imageUrl,
     required this.title,
     required this.author,
-    required this.progress,
+    this.progress,
   });
 
   @override
@@ -55,14 +55,15 @@ class CurrentBook extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          LinearProgressIndicator(
-            value: progress,
-            backgroundColor: ColorSystem.light,
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(ColorSystem.highlight),
-            minHeight: 6,
-            borderRadius: BorderRadius.circular(3),
-          ),
+          if (progress != null)
+            LinearProgressIndicator(
+              value: progress,
+              backgroundColor: ColorSystem.light,
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(ColorSystem.highlight),
+              minHeight: 6,
+              borderRadius: BorderRadius.circular(3),
+            ),
         ],
       ),
     );

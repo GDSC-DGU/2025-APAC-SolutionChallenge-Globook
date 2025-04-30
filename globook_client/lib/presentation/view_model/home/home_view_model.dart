@@ -2,6 +2,7 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:globook_client/domain/model/book.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selection_modal.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selector.dart';
@@ -31,8 +32,7 @@ class HomeViewModel extends GetxController {
   /* ----------------- Private Fields --------------------- */
   /* ------------------------------------------------------ */
   final RxString _currentBook = RxString('');
-  final RxList<Map<String, dynamic>> _recommendedBooks =
-      RxList<Map<String, dynamic>>([]);
+  final RxList<Book> _anotherBooks = RxList<Book>([]);
   final Rx<Language> _selectedSourceLanguage =
       Rx<Language>(const Language(code: 'ENG', name: 'English'));
   final Rx<Language> _selectedTargetLanguage =
@@ -42,7 +42,7 @@ class HomeViewModel extends GetxController {
   /* ----------------- Public Fields ---------------------- */
   /* ------------------------------------------------------ */
   String get currentBook => _currentBook.value;
-  List<Map<String, dynamic>> get recommendedBooks => _recommendedBooks;
+  List<Book> get anotherBooks => _anotherBooks;
   Language get selectedSourceLanguage => _selectedSourceLanguage.value;
   Language get selectedTargetLanguage => _selectedTargetLanguage.value;
   LanguagePair get currentLanguages => LanguagePair(
@@ -60,7 +60,7 @@ class HomeViewModel extends GetxController {
     await _loadLanguageSettings();
 
     // 초기 데이터 로드
-    loadBooks();
+    await loadBooks();
   }
 
   Future<void> _loadLanguageSettings() async {
@@ -88,26 +88,38 @@ class HomeViewModel extends GetxController {
     );
   }
 
-  void loadBooks() async {
+  Future<void> loadBooks() async {
     // 예시 데이터
     _currentBook.value = '데미안';
 
-    _recommendedBooks.addAll([
-      {
-        'title': 'Beneath the Wheel',
-        'author': '헤르만 헤세',
-        'image': 'assets/books/beneath_the_wheel.jpg'
-      },
-      {
-        'title': 'Crime and Punishment',
-        'author': '표도르 도스토예프스키',
-        'image': 'assets/books/crime_and_punishment.jpg'
-      },
-      {
-        'title': 'Foster',
-        'author': 'Claire Keegan',
-        'image': 'assets/books/foster.jpg'
-      }
+    _anotherBooks.addAll([
+      const Book(
+        id: '1',
+        title: 'Beneath the Wheel',
+        author: '헤르만 헤세',
+        imageUrl: 'assets/books/beneath_the_wheel.jpg',
+        description: '',
+        category: '',
+        authorBooks: [],
+      ),
+      const Book(
+        id: '2',
+        title: 'Crime and Punishment',
+        author: '표도르 도스토예프스키',
+        imageUrl: 'assets/books/crime_and_punishment.jpg',
+        description: '',
+        category: '',
+        authorBooks: [],
+      ),
+      const Book(
+        id: '3',
+        title: 'Foster',
+        author: 'Claire Keegan',
+        imageUrl: 'assets/books/foster.jpg',
+        description: '',
+        category: '',
+        authorBooks: [],
+      ),
     ]);
   }
 

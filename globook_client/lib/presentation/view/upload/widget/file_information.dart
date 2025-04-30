@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:globook_client/app/config/color_system.dart';
+import 'package:globook_client/domain/model/file.dart';
+import 'package:intl/intl.dart';
 
 class FileInformation extends StatelessWidget {
-  final Map<String, dynamic> file;
+  final UserFile file;
 
-  const FileInformation({super.key, required this.file});
+  const FileInformation({
+    super.key,
+    required this.file,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -13,32 +18,28 @@ class FileInformation extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            file['fileName'],
+            file.name,
             style: const TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
           Text(
-            file['uploadTime'],
+            '업로드: ${_formatDate(file.uploadedAt)}',
             style: const TextStyle(
               fontSize: 12,
               color: ColorSystem.lightText,
             ),
           ),
-          if (file['pages'] != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              '${file['pages']}/1',
-              style: const TextStyle(
-                fontSize: 12,
-                color: ColorSystem.lightText,
-              ),
-            ),
-          ],
         ],
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('yyyy.MM.dd').format(date);
   }
 }
