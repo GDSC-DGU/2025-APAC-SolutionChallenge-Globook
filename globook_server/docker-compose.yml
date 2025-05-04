@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  at-sopt-seminar4:
+    image: jang99u/globook:latest
+    container_name: globook
+    ports:
+      - "8080:8080"
