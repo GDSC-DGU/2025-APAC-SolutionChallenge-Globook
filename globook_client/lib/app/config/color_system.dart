@@ -6,6 +6,7 @@ abstract class ColorSystem {
   static const light = Color(0xFFE7ECFB);
   static const mainText = Color(0xFF333C55);
   static const lightText = Color(0xFF828282);
+  static const darkText = Color(0xFF333333);
   static const logoText = Color(0xFFA4B3DE);
   static const line = Color(0xFFd7d7d7);
   static const bar = Color(0xFFF1F1F1);
