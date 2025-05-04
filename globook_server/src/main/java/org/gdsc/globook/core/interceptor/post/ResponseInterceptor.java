@@ -1,4 +1,4 @@
-package org.gdsc.globook.core.interceptor;
+package org.gdsc.globook.core.interceptor.post;
 
 import lombok.NonNull;
 import org.gdsc.globook.core.common.BaseResponse;
