@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get/get.dart';
-import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/app/config/color_system.dart';
 import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/presentation/view/login/widget/icon_text_field.dart';
-import 'package:globook_client/presentation/view_model/login/login_view_model.dart';
+import 'package:globook_client/presentation/view_model/register/register_view_model.dart';
 import 'package:globook_client/presentation/widget/styled_button.dart';
 
-class LoginScreen extends BaseScreen<LoginViewModel> {
-  const LoginScreen({super.key});
+class RegisterScreen extends BaseScreen<RegisterViewModel> {
+  const RegisterScreen({super.key});
 
   @override
   Widget buildBody(BuildContext context) {
@@ -18,7 +15,7 @@ class LoginScreen extends BaseScreen<LoginViewModel> {
       padding: const EdgeInsets.symmetric(vertical: 100, horizontal: 24),
       child: Column(
         children: [
-          const Text('Login',
+          const Text('Register',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
           IconTextField(
@@ -40,39 +37,27 @@ class LoginScreen extends BaseScreen<LoginViewModel> {
             },
           ),
           const SizedBox(height: 20),
+          IconTextField(
+            label: 'Password Check',
+            hintText: 'Enter your password again',
+            icon: Icons.lock,
+            isPassword: true,
+            onChanged: (value) {
+              viewModel.onChangedPasswordCheck(value);
+            },
+          ),
+          const SizedBox(height: 60),
           StyledButton(
             onPressed: () {
-              viewModel.login();
+              viewModel.signup();
             },
             height: 60,
             borderRadius: 20,
             width: double.infinity,
-            text: 'Login',
+            backgroundColor: ColorSystem.load2,
+            text: 'Sign Up',
           ),
           const SizedBox(height: 20),
-          StyledButton(
-              onPressed: () {
-                Get.toNamed(AppRoutes.REGISTER);
-              },
-              height: 60,
-              borderRadius: 20,
-              width: double.infinity,
-              text: 'Sign Up',
-              backgroundColor: ColorSystem.load2),
-          const SizedBox(height: 20),
-          StyledButton(
-            onPressed: () {
-              viewModel.login();
-            },
-            width: double.infinity,
-            height: 60,
-            borderRadius: 20,
-            icon: SvgPicture.asset('assets/icons/svg/google-logo.svg',
-                width: 24, height: 24),
-            text: 'Login with Google',
-            backgroundColor: ColorSystem.highlightDark,
-          ),
-          SizedBox(height: MediaQuery.of(context).viewInsets.bottom),
         ],
       ),
     ));
