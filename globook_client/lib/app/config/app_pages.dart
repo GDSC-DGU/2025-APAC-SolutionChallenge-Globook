@@ -6,11 +6,13 @@ import 'package:globook_client/presentation/view/genre_books/genre_books_screen.
 import 'package:globook_client/presentation/view/home/home_screen.dart';
 import 'package:globook_client/presentation/view/login/login_screen.dart';
 import 'package:globook_client/presentation/view/reader/reader_screen.dart';
+import 'package:globook_client/presentation/view/register/register_screen.dart';
 import 'package:globook_client/presentation/view/root/root_screen.dart';
 import 'package:globook_client/presentation/view/splash/splash_screen.dart';
 import 'package:globook_client/presentation/view_model/book_store_detail/book_store_detail_binding.dart';
 import 'package:globook_client/presentation/view_model/genre_books/genre_books_binding.dart';
 import 'package:globook_client/presentation/view_model/reader/reader_binding.dart';
+import 'package:globook_client/presentation/view_model/register/register_binding.dart';
 
 abstract class AppPages {
   static List<GetPage> pages = [
@@ -49,6 +51,11 @@ abstract class AppPages {
       name: AppRoutes.READER,
       page: () => const ReaderScreen(),
       binding: ReaderBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.REGISTER,
+      page: () => const RegisterScreen(),
+      binding: RegisterBinding(),
     ),
   ];
 }
