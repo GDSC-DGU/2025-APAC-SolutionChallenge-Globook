@@ -73,7 +73,7 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd /root/globook
-            docker-compose down
-            docker-compose pull
-            docker-compose up -d --remove-orphans
+            docker compose down
+            docker compose pull
+            docker compose up -d --remove-orphans
             docker image prune -f
