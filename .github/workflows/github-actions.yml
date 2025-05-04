@@ -5,6 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - 'globook_server/**'
+      - '.github/**'
 
 permissions:
   contents: read
@@ -72,7 +73,7 @@ jobs:
           username: mj
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
-            cd /root/globook
+            cd /home/mj/globook
             docker compose down
             docker compose pull
             docker compose up -d --remove-orphans
