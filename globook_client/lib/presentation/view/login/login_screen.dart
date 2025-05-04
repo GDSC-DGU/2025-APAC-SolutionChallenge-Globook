@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/app/config/color_system.dart';
 import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/presentation/view/login/widget/icon_text_field.dart';
@@ -50,7 +52,7 @@ class LoginScreen extends BaseScreen<LoginViewModel> {
           const SizedBox(height: 20),
           StyledButton(
               onPressed: () {
-                viewModel.login();
+                Get.toNamed(AppRoutes.REGISTER);
               },
               height: 60,
               borderRadius: 20,
