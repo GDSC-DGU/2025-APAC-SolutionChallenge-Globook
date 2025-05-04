@@ -1,0 +1,9 @@
+import 'package:get/get.dart';
+import 'package:globook_client/presentation/view_model/reader/reader_view_model.dart';
+
+class ReaderBinding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<ReaderViewModel>(() => ReaderViewModel());
+  }
+}
