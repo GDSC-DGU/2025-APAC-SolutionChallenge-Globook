@@ -1,4 +1,4 @@
-package org.gdsc.globook.domain;
+package org.gdsc.globook.domain.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
