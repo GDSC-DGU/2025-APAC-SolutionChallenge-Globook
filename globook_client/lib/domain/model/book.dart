@@ -17,9 +17,3 @@ class Book {
     this.authorBooks = const [],
   });
 }
-
-enum BookCategory {
-  fiction,
-  nonFiction,
-  philosophy,
-}
