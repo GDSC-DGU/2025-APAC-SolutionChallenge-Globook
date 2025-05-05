@@ -10,4 +10,5 @@ abstract class AppRoutes {
   static const String BOOK_STORE_DETAIL = '/book-store-detail/:bookId';
   static const String GENRE_BOOKS = '/genre-books/:genreId';
   static const String READER = '/reader/:bookId';
+  static const String FAVORITE = '/favorite';
 }
