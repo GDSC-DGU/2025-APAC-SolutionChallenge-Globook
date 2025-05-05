@@ -2,12 +2,15 @@ package org.gdsc.globook.presentation.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gdsc.globook.application.dto.BookSearchResponseDto;
+import org.gdsc.globook.application.dto.FavoriteBookListResponseDto;
 import org.gdsc.globook.application.dto.StatusResponseDto;
 import org.gdsc.globook.application.service.UserBookService;
 import org.gdsc.globook.core.annotation.AuthenticationPrincipal;
 import org.gdsc.globook.core.common.BaseResponse;
 import org.gdsc.globook.presentation.request.UserPreferenceRequestDto;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +23,22 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users/books")
 public class UserBookController {
     private final UserBookService userBookService;
+
+    // 다운로드한 도서 리스트 가져오기
+    @GetMapping("")
+    public BaseResponse<BookSearchResponseDto> getDownloadedBookList(
+            @AuthenticationPrincipal Long userId
+    ) {
+        return BaseResponse.success(userBookService.getDownloadedBookList(userId));
+    }
+
+    // 도서 즐겨찾기 추가
+    @GetMapping("/favorite")
+    public BaseResponse<FavoriteBookListResponseDto> getFavoriteBookList(
+            @AuthenticationPrincipal Long userId
+    ) {
+        return BaseResponse.success(userBookService.getFavoriteBookList(userId));
+    }
 
     // 도서 즐겨찾기 추가
     @PatchMapping("/{bookId}")
