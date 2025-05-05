@@ -21,6 +21,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.gdsc.globook.domain.type.EFileStatus;
+import org.gdsc.globook.domain.type.ELanguage;
+import org.gdsc.globook.domain.type.EPersona;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Entity
@@ -40,8 +42,18 @@ public class File {
     @Column(name = "`index`", nullable = false)
     private Long index;
 
+    @Column(name = "max_index", nullable = false)
+    private Long maxIndex;
+
+    @Column(name = "language", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ELanguage language;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "persona", nullable = false)
+    private EPersona persona;
 
     @Column(name = "file_status", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -57,18 +69,24 @@ public class File {
     private List<Paragraph> paragraphs = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    public File(String title, User user) {
+    public File(String title, User user, EPersona persona, Long maxIndex, ELanguage language) {
         this.title = title;
         this.user = user;
         this.index = 0L;
+        this.maxIndex = maxIndex;
+        this.language = language;
+        this.persona = persona;
         this.createdAt = LocalDateTime.now();
         this.fileStatus = EFileStatus.UPLOAD;
     }
 
-    public static File create(String title, User user) {
+    public static File create(String title, User user, EPersona persona, Long maxIndex, ELanguage language) {
         return File.builder()
                 .title(title)
                 .user(user)
+                .language(language)
+                .persona(persona)
+                .maxIndex(maxIndex)
                 .build();
     }
 }

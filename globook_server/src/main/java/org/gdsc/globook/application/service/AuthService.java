@@ -56,7 +56,6 @@ public class AuthService {
                 signUpRequestDto.email(),
                 bCryptPasswordEncoder.encode(signUpRequestDto.password()),
                 RandomNicknameUtil.generateRandomNickname(),
-                ELanguage.KO,   // 여기 언어 입력 받아서 바꿔야 함.
                 ELoginProvider.DEFAULT
         );
 
@@ -85,7 +84,6 @@ public class AuthService {
                             oAuth2UserInfo.email(),
                             bCryptPasswordEncoder.encode(RandomPasswordUtil.generateRandomPassword()),
                             RandomNicknameUtil.generateRandomNickname(),
-                            ELanguage.KO,   // 여기 언어 입력 받아서 바꿔야 함.
                             ELoginProvider.GOOGLE
                     );
                     return userRepository.save(newUser);

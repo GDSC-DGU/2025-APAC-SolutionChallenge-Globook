@@ -3,6 +3,7 @@ package org.gdsc.globook.application.service;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gdsc.globook.application.dto.StatusResponseDto;
 import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.UserBookRepository;
 import org.gdsc.globook.application.repository.UserRepository;
@@ -11,6 +12,10 @@ import org.gdsc.globook.core.exception.GlobalErrorCode;
 import org.gdsc.globook.domain.entity.Book;
 import org.gdsc.globook.domain.entity.User;
 import org.gdsc.globook.domain.entity.UserBook;
+import org.gdsc.globook.domain.type.ELanguage;
+import org.gdsc.globook.domain.type.EPersona;
+import org.gdsc.globook.domain.type.EUserBookStatus;
+import org.gdsc.globook.presentation.request.UserPreferenceRequestDto;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,7 +33,9 @@ public class UserBookService {
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_BOOK));
 
         UserBook userBook = getUserBook(user, book)
-                .orElseGet(() -> UserBook.create(book, user, false, false));
+                .orElseGet(() -> UserBook.create(
+                        book, user, false, false, EUserBookStatus.DOWNLOAD
+                ));
 
         userBook.updateFavorite(true);
         userBookRepository.save(userBook);
@@ -49,15 +56,23 @@ public class UserBookService {
         return true;
     }
 
-    public boolean addBookToUserDownload(Long userId, Long bookId) {
+    public boolean addBookToUserDownload(Long userId, Long bookId, UserPreferenceRequestDto userPreferenceRequestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_BOOK));
 
-        UserBook userBook = getUserBook(user, book)
-                .orElseGet(() -> UserBook.create(book, user, false, false));
+        EPersona persona = EPersona.valueOf(userPreferenceRequestDto.persona());
+        ELanguage language = ELanguage.valueOf(userPreferenceRequestDto.language());
 
+        UserBook userBook = getUserBook(user, book)
+                .orElseGet(() -> UserBook.create(
+                        book, user, false, false, EUserBookStatus.PROCESSING
+                ));
+
+        userBook.updatePersona(persona);
+        userBook.updateLanguage(language);
+        // userBook.updateMaxIndex(book.getMaxIndex()); <- 이거는 나중에 다운로드할 때 해줘야함
         userBook.updateDownload(true);
         userBookRepository.save(userBook);
         return true;

@@ -33,11 +33,8 @@ public class Paragraph {
     @Column(name = "`index`", nullable = false)
     private Long index;
 
-    @Column(name = "language", nullable = false)
-    private ELanguage language;
-
-    @Column(name = "audio", nullable = false)
-    private String audio;
+    @Column(name = "audio_url", nullable = false)
+    private String audioUrl;
 
     // ------ Foreign Key ------ //
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,32 +46,29 @@ public class Paragraph {
     private File file;  // 도서 id
 
     @Builder(access = AccessLevel.PRIVATE)
-    public Paragraph(String content, Long index, ELanguage language, String audio, Book book, File file) {
+    public Paragraph(String content, Long index, String audioUrl, Book book, File file) {
         this.content = content;
         this.index = index;
-        this.language = language;
-        this.audio = audio;
+        this.audioUrl = audioUrl;
         this.book = book;
         this.file = file;
     }
 
-    public static Paragraph createBookParagraph(String content, Long index, ELanguage language, String audio, Book book) {
+    public static Paragraph createBookParagraph(String content, Long index, String audioUrl, Book book) {
         return Paragraph.builder()
                 .content(content)
                 .index(index)
-                .language(language)
-                .audio(audio)
+                .audioUrl(audioUrl)
                 .book(book)
                 .file(null)
                 .build();
     }
 
-    public static Paragraph createFileParagraph(String content, Long index, ELanguage language, String audio, File file) {
+    public static Paragraph createFileParagraph(String content, Long index, String audioUrl, File file) {
         return Paragraph.builder()
                 .content(content)
                 .index(index)
-                .language(language)
-                .audio(audio)
+                .audioUrl(audioUrl)
                 .book(null)
                 .file(file)
                 .build();

@@ -40,6 +40,9 @@ public class Book {
     @Column(name = "image_url", nullable = false)
     private String imageUrl;    // 표지 이미지 URL
 
+    @Column(name = "origin_url", nullable = false)
+    private String originUrl;    // 도서 원본 URL
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -55,21 +58,23 @@ public class Book {
     private List<Paragraph> paragraphs = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    public Book(String title, String author, String description, String imageUrl, ECategory category) {
+    public Book(String title, String author, String description, String imageUrl, String originUrl, ECategory category) {
         this.title = title;
         this.author = author;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.originUrl = originUrl;
         this.category = category;
         this.createdAt = LocalDateTime.now();
     }
 
-    public static Book create(String title, String author, String description, String imageUrl, ECategory category) {
+    public static Book create(String title, String author, String description, String imageUrl, String originUrl, ECategory category) {
         return Book.builder()
                 .title(title)
                 .author(author)
                 .description(description)
                 .imageUrl(imageUrl)
+                .originUrl(originUrl)
                 .category(category)
                 .build();
     }
