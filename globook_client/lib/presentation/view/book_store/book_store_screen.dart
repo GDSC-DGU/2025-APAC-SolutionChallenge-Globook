@@ -12,34 +12,36 @@ class BookStoreScreen extends BaseScreen<BookStoreViewModel> {
 
   @override
   Widget buildBody(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 60.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: SearchField(
-                hintText: 'Search for your favorite book',
-                onChanged: (value) {
-                  viewModel.searchBooks(value);
-                },
+    return Obx(
+      () => SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 60.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: SearchField(
+                  hintText: 'Search for your favorite book',
+                  onChanged: (value) {
+                    viewModel.searchBooks(value);
+                  },
+                ),
               ),
-            ),
-            const SizedBox(height: 32),
-            _buildTodayBooks(),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                children: [
-                  _buildNonFictionSection(),
-                  const SizedBox(height: 32),
-                  _buildPhilosophySection(),
-                ],
+              const SizedBox(height: 32),
+              _buildTodayBooks(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    _buildNonFictionSection(),
+                    const SizedBox(height: 32),
+                    _buildPhilosophySection(),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -50,7 +52,6 @@ class BookStoreScreen extends BaseScreen<BookStoreViewModel> {
       title: "Today's Book",
       books: viewModel.todayBooks,
       onBookPressed: (book) {
-        // TODO: Navigate to book detail
         Get.toNamed(AppRoutes.BOOK_STORE_DETAIL, arguments: book.id);
       },
       onViewAllPressed: () {
