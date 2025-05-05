@@ -1,4 +1,4 @@
-package org.gdsc.globook.application;
+package org.gdsc.globook.application.repository;
 
 import java.util.Optional;
 import org.gdsc.globook.domain.User;

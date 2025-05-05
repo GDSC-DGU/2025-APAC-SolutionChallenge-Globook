@@ -1,7 +1,7 @@
 package org.gdsc.globook.core.security.service;
 
 import lombok.RequiredArgsConstructor;
-import org.gdsc.globook.application.UserRepository;
+import org.gdsc.globook.application.repository.UserRepository;
 import org.gdsc.globook.core.exception.CustomException;
 import org.gdsc.globook.core.exception.GlobalErrorCode;
 import org.gdsc.globook.core.security.info.CustomUserDetails;

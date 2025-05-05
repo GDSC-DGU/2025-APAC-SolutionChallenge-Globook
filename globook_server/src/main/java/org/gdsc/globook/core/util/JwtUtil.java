@@ -37,22 +37,6 @@ public class JwtUtil implements InitializingBean {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createToken(String email, EUserRole role, Long expirationPeriod) {
-        Claims claims = Jwts.claims();
-        claims.put(Constants.USER_EMAIL_CLAIM_NAME, email);
-        claims.put(Constants.USER_ROLE_CLAIM_NAME, role.toString());
-
-        Date now = new Date();
-        Date tokenValidity = new Date(now.getTime() + expirationPeriod);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(tokenValidity)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-    }
-
     public String createToken(Long id, EUserRole role, Long expirationPeriod) {
         Claims claims = Jwts.claims();
         claims.put(Constants.USER_ID_CLAIM_NAME, id);
