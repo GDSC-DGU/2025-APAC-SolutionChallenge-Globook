@@ -1,4 +1,4 @@
-package com.example.globook_client
+package com.globook.kyujin
 
 import io.flutter.embedding.android.FlutterActivity
 
