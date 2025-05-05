@@ -2,6 +2,7 @@ package org.gdsc.globook.core.interceptor.pre;
 
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.core.annotation.AuthenticationPrincipal;
+import org.gdsc.globook.core.constant.Constants;
 import org.gdsc.globook.core.exception.CustomException;
 import org.gdsc.globook.core.exception.GlobalErrorCode;
 import org.springframework.core.MethodParameter;
@@ -26,7 +27,7 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
                                   ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) throws Exception {
-        final Object userIdObj = webRequest.getAttribute("AUTHENTICATION_PRINCIPAL", NativeWebRequest.SCOPE_REQUEST);
+        final Object userIdObj = webRequest.getAttribute(Constants.AUTHENTICATION, NativeWebRequest.SCOPE_REQUEST);
 
         log.info("resolveArgument = {}", userIdObj);
         if (userIdObj == null) {

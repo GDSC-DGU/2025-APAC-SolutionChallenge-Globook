@@ -9,7 +9,6 @@ import org.gdsc.globook.core.constant.Constants;
 import org.gdsc.globook.core.security.info.JwtToken;
 import org.gdsc.globook.presentation.request.SignInRequestDto;
 import org.gdsc.globook.presentation.request.SignUpRequestDto;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;

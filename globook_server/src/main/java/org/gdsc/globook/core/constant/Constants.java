@@ -13,6 +13,7 @@ public class Constants {
     public static final String APPLICATION_FORM_URLENCODED_WITH_CHARSET = "application/x-www-form-urlencoded;charset=utf-8";
     public static final String GOOGLE_RESOURCE_SERVER_URL = "https://www.googleapis.com/oauth2/v3/userinfo";
     public static final String GOOGLE_SOCIAL_ID_FIELD = "sub";
+    public static final String AUTHENTICATION = "authentication";
 
     public static final List<String> NO_NEED_AUTH_URLS = List.of(
             "/health",  // 서버 상태 체크
