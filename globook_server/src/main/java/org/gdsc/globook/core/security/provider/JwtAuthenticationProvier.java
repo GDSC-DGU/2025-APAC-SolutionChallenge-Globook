@@ -5,7 +5,7 @@ import org.gdsc.globook.core.security.info.CustomUserDetails;
 import org.gdsc.globook.core.security.info.JwtAuthenticationToken;
 import org.gdsc.globook.core.security.info.JwtUserInfo;
 import org.gdsc.globook.core.security.service.CustomUserDetailsService;
-import org.gdsc.globook.domain.EUserRole;
+import org.gdsc.globook.domain.type.EUserRole;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

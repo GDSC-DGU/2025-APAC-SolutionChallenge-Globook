@@ -12,7 +12,7 @@ import org.gdsc.globook.core.constant.Constants;
 import org.gdsc.globook.core.security.info.JwtAuthenticationToken;
 import org.gdsc.globook.core.security.info.JwtUserInfo;
 import org.gdsc.globook.core.util.JwtUtil;
-import org.gdsc.globook.domain.EUserRole;
+import org.gdsc.globook.domain.type.EUserRole;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 Authentication authenticationResult = authenticationManager.authenticate(beforeAuthentication);
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationResult);
+                log.info("JWT Authentication Success: {}", authenticationResult.getName());
             } catch (Exception ex) {
                 SecurityContextHolder.clearContext();
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, ex.getMessage());

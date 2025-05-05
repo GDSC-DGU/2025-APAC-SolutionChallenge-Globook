@@ -1,4 +1,4 @@
-package org.gdsc.globook.domain;
+package org.gdsc.globook.domain.type;
 
 import lombok.RequiredArgsConstructor;
 

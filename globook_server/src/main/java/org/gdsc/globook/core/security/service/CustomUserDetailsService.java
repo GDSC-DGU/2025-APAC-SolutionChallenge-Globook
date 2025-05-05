@@ -5,7 +5,7 @@ import org.gdsc.globook.application.repository.UserRepository;
 import org.gdsc.globook.core.exception.CustomException;
 import org.gdsc.globook.core.exception.GlobalErrorCode;
 import org.gdsc.globook.core.security.info.CustomUserDetails;
-import org.gdsc.globook.domain.User;
+import org.gdsc.globook.domain.entity.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

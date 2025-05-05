@@ -1,4 +1,4 @@
-package org.gdsc.globook.domain;
+package org.gdsc.globook.domain.entity;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,6 +16,9 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.gdsc.globook.domain.type.ELanguage;
+import org.gdsc.globook.domain.type.ELoginProvider;
+import org.gdsc.globook.domain.type.EUserRole;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Entity

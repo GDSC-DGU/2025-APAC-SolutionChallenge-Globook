@@ -12,7 +12,7 @@ import java.security.Key;
 import java.util.Date;
 import org.gdsc.globook.core.constant.Constants;
 import org.gdsc.globook.core.security.info.JwtToken;
-import org.gdsc.globook.domain.EUserRole;
+import org.gdsc.globook.domain.type.EUserRole;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

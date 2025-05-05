@@ -1,7 +1,7 @@
 package org.gdsc.globook.core.security.info;
 
 import lombok.Builder;
-import org.gdsc.globook.domain.EUserRole;
+import org.gdsc.globook.domain.type.EUserRole;
 
 @Builder
 public record JwtUserInfo(

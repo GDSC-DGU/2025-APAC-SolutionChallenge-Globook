@@ -1,7 +1,7 @@
 package org.gdsc.globook.core.security.info;
 
 import java.util.Collection;
-import org.gdsc.globook.domain.EUserRole;
+import org.gdsc.globook.domain.type.EUserRole;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 

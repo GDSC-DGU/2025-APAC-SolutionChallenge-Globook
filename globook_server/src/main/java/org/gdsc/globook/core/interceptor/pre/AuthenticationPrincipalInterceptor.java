@@ -3,6 +3,7 @@ package org.gdsc.globook.core.interceptor.pre;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.gdsc.globook.core.constant.Constants;
 import org.gdsc.globook.core.exception.CustomException;
 import org.gdsc.globook.core.exception.GlobalErrorCode;
 import org.springframework.security.core.Authentication;
@@ -21,7 +22,7 @@ public class AuthenticationPrincipalInterceptor implements HandlerInterceptor {
         if (authentication == null) {
             throw new CustomException(GlobalErrorCode.EMPTY_AUTHENTICATION);
         }
-        request.setAttribute("AUTHENTICATION_PRINCIPAL", authentication.getName());
+        request.setAttribute(Constants.AUTHENTICATION, authentication.getName());
         log.info("AUTHENTICATION_PRINCIPAL = {}", authentication.getName());
         return HandlerInterceptor.super.preHandle(request, response, handler);
     }
