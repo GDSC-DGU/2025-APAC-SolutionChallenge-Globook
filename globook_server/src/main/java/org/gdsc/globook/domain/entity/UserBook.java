@@ -67,4 +67,11 @@ public class UserBook {
                 .build();
     }
 
+    public void updateDownload(Boolean download) {
+        this.download = download;
+    }
+
+    public void updateFavorite(Boolean favorite) {
+        this.favorite = favorite;
+    }
 }
