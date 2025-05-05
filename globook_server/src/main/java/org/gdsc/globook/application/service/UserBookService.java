@@ -1,8 +1,13 @@
 package org.gdsc.globook.application.service;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gdsc.globook.application.dto.BookSearchResponseDto;
+import org.gdsc.globook.application.dto.BookThumbnailResponseDto;
+import org.gdsc.globook.application.dto.FavoriteBookListResponseDto;
+import org.gdsc.globook.application.dto.FavoriteBookThumbnailResponseDto;
 import org.gdsc.globook.application.dto.StatusResponseDto;
 import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.UserBookRepository;
@@ -17,6 +22,7 @@ import org.gdsc.globook.domain.type.EPersona;
 import org.gdsc.globook.domain.type.EUserBookStatus;
 import org.gdsc.globook.presentation.request.UserPreferenceRequestDto;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -80,5 +86,36 @@ public class UserBookService {
 
     public Optional<UserBook> getUserBook(User user, Book book) {
         return userBookRepository.findByUserAndBook(user, book);
+    }
+
+    public FavoriteBookListResponseDto getFavoriteBookList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
+
+        List<UserBook> userBookList = userBookRepository.findByUserAndFavorite(user, true);
+        List<FavoriteBookThumbnailResponseDto> favoriteBookList = userBookList.stream()
+                .map(userBook -> FavoriteBookThumbnailResponseDto.fromEntity(
+                        userBook.getBook(), userBook
+                )).toList();
+
+        return FavoriteBookListResponseDto.fromDtoList(
+                favoriteBookList
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public BookSearchResponseDto getDownloadedBookList(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
+
+        List<UserBook> userBookList = userBookRepository.findByUserAndDownload(user, true);
+        List<BookThumbnailResponseDto> downloadedBookList = userBookList.stream()
+                .map(userBook -> BookThumbnailResponseDto.fromEntity(
+                        userBook.getBook()
+                )).toList();
+
+        return BookSearchResponseDto.of(
+                downloadedBookList
+        );
     }
 }
