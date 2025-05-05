@@ -7,7 +7,6 @@ import org.gdsc.globook.core.annotation.AuthenticationPrincipal;
 import org.gdsc.globook.core.common.BaseResponse;
 import org.gdsc.globook.core.security.info.JwtToken;
 import org.gdsc.globook.core.util.JwtUtil;
-import org.gdsc.globook.domain.type.ELanguage;
 import org.gdsc.globook.domain.type.ELoginProvider;
 import org.gdsc.globook.domain.entity.User;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +31,7 @@ public class TestController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<String> signUp() {
-        User user = User.create("test", "test", "test", ELanguage.KO, ELoginProvider.DEFAULT);
+        User user = User.create("test", "test", "test", ELoginProvider.DEFAULT);
         userRepository.save(user);
         return ResponseEntity.ok("User Info: " + user.getId());
     }

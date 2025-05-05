@@ -41,10 +41,6 @@ public class User {
     @Column(name = "nickname")
     private String nickname;
 
-    @Column(name = "language", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ELanguage language;
-
     @Column(name = "login_provider", nullable = false)
     @Enumerated(EnumType.STRING)
     private ELoginProvider provider;
@@ -58,21 +54,19 @@ public class User {
     private List<UserBook> userBooks = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)
-    public User(String email, String password, String nickname, ELanguage language, ELoginProvider provider) {
+    public User(String email, String password, String nickname, ELoginProvider provider) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
-        this.language = language;
         this.provider = provider;
         this.role = EUserRole.USER;
     }
 
-    public static User create(String email, String password, String nickname, ELanguage language, ELoginProvider provider) {
+    public static User create(String email, String password, String nickname, ELoginProvider provider) {
         return User.builder()
                 .email(email)
                 .password(password)
                 .nickname(nickname)
-                .language(language)
                 .provider(provider)
                 .build();
     }
