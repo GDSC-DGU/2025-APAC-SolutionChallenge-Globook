@@ -2,7 +2,7 @@ package org.gdsc.globook.presentation.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gdsc.globook.application.UserRepository;
+import org.gdsc.globook.application.repository.UserRepository;
 import org.gdsc.globook.core.annotation.AuthenticationPrincipal;
 import org.gdsc.globook.core.common.BaseResponse;
 import org.gdsc.globook.core.security.info.JwtToken;
