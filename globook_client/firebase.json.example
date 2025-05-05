@@ -1,0 +1,31 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "ProjectId",
+          "appId": "AppId",
+          "fileOutput": "FileOutput"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "ProjectId",
+          "appId": "AppId",
+          "uploadDebugSymbols": false,
+          "fileOutput": "FileOutput"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "ProjectId",
+          "configurations": {
+            "android": "AndroidAppId",
+            "ios": "IosAppId",
+            "web": "WebAppId"
+          }
+        }
+      }
+    }
+  }
+}

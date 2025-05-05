@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:globook_client/app/config/color_system.dart';
-import 'package:globook_client/core/view/base_widget.dart';
 
-class IconTextField extends BaseWidget {
+class IconTextField extends StatefulWidget {
   const IconTextField({
     super.key,
     required this.label,
@@ -17,12 +16,21 @@ class IconTextField extends BaseWidget {
   final IconData icon;
   final bool isPassword;
   final Function(String)? onChanged;
+
   @override
-  Widget buildView(BuildContext context) {
+  State<IconTextField> createState() => _IconTextFieldState();
+}
+
+class _IconTextFieldState extends State<IconTextField> {
+  bool _obscureText = true;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(color: ColorSystem.lightText)),
+        Text(widget.label,
+            style: const TextStyle(color: ColorSystem.lightText)),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
@@ -33,20 +41,28 @@ class IconTextField extends BaseWidget {
           child: TextField(
             decoration: InputDecoration(
               border: InputBorder.none,
-              hintText: hintText,
+              hintText: widget.hintText,
               hintStyle:
                   const TextStyle(color: ColorSystem.lightText, fontSize: 13),
-              icon: Icon(icon, color: ColorSystem.lightText, size: 24),
-              suffixIcon: isPassword
+              icon: Icon(widget.icon, color: ColorSystem.lightText, size: 24),
+              suffixIcon: widget.isPassword
                   ? IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.visibility),
+                      onPressed: () {
+                        setState(() {
+                          _obscureText = !_obscureText;
+                        });
+                      },
+                      icon: Icon(
+                        _obscureText ? Icons.visibility : Icons.visibility_off,
+                        color: ColorSystem.lightText,
+                      ),
                     )
                   : null,
             ),
-            onChanged: onChanged,
-            obscureText: isPassword,
-            keyboardType: isPassword ? TextInputType.visiblePassword : null,
+            onChanged: widget.onChanged,
+            obscureText: widget.isPassword ? _obscureText : false,
+            keyboardType:
+                widget.isPassword ? TextInputType.visiblePassword : null,
           ),
         ),
       ],

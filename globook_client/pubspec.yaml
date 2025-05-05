@@ -36,8 +36,9 @@ dependencies:
   # Icon for iOS/Android Icons
   flutter_launcher_icons: ^0.14.3
 
-  # Encryption for Server URL / GCP, Firebase Key
+  # Environment Variables
   envied: ^1.1.1
+  flutter_dotenv: ^5.1.0
 
   # SVG 이미지 렌더링
   flutter_svg: ^2.0.10+1
@@ -56,11 +57,19 @@ dependencies:
   just_audio: ^0.9.36
   path_provider: ^2.1.2
 
+  # Google Sign In
+  google_sign_in: ^6.2.1
+  firebase_core: ^3.13.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  #for setting lint
   flutter_lints: ^3.0.0
+
+  #for generating env file
+  build_runner: ^2.4.8
+  envied_generator: ^1.1.1
 
 flutter:
   uses-material-design: true
@@ -69,6 +78,7 @@ flutter:
     - assets/icons/
     - assets/icons/svg/
     - assets/icons/png/
+    - assets/config/.dev.env
 
   fonts:
     - family: Inter

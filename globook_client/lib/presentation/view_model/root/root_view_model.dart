@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 import 'package:get/get.dart';
+import 'package:globook_client/presentation/view_model/home/home_view_model.dart';
 
 class RootViewModel extends GetxController {
   /* ------------------------------------------------------ */
@@ -26,7 +27,8 @@ class RootViewModel extends GetxController {
   void onInit() async {
     super.onInit();
 
-    // Dependency Injection
+    // 초기 화면을 Home으로 설정
+    _selectedBottomNavigationIndex.value = 2;
   }
 
   void changeIndex(int index) async {

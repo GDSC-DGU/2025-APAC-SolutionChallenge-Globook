@@ -62,7 +62,7 @@ class LoginScreen extends BaseScreen<LoginViewModel> {
           const SizedBox(height: 20),
           StyledButton(
             onPressed: () {
-              viewModel.login();
+              viewModel.signInWithGoogle();
             },
             width: double.infinity,
             height: 60,

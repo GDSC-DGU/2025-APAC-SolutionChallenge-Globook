@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:globook_client/app/config/color_system.dart';
+import 'package:globook_client/domain/enum/Efile.dart';
 import 'package:globook_client/domain/model/file.dart';
 import 'package:globook_client/presentation/widget/styled_button.dart';
 

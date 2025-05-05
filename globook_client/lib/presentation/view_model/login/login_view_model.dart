@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'package:get/get.dart';
+import 'package:globook_client/domain/usecase/auth/google_login_usecase.dart';
 import 'package:globook_client/domain/usecase/auth/login_usecase.dart';
 
 class LoginViewModel extends GetxController {
@@ -11,6 +12,7 @@ class LoginViewModel extends GetxController {
   /* -------------------- DI Fields ----------------------- */
   /* ------------------------------------------------------ */
   late final LoginUseCase _loginUseCase;
+  late final GoogleLoginUseCase _googleLoginUseCase;
 
   /* ------------------------------------------------------ */
   /* ----------------- Private Fields --------------------- */
@@ -29,6 +31,7 @@ class LoginViewModel extends GetxController {
     super.onInit();
     // Dependency Injection
     _loginUseCase = Get.find<LoginUseCase>();
+    _googleLoginUseCase = Get.find<GoogleLoginUseCase>();
   }
 
   void onChangedEmail(String email) {
@@ -40,10 +43,10 @@ class LoginViewModel extends GetxController {
   }
 
   void login() async {
-    printInfo(info: 'login ${email} ${password}');
-    final result = await _loginUseCase.login(email, password);
+    await _loginUseCase.login(email, password);
   }
 
-  @override
-  void onReady() async {}
+  void signInWithGoogle() async {
+    await _googleLoginUseCase.signInWithGoogle();
+  }
 }

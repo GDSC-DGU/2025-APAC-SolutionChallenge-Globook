@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/presentation/view/book_store/book_store_screen.dart';
+import 'package:globook_client/presentation/view/favorite/favorite_screen.dart';
 import 'package:globook_client/presentation/view/home/home_screen.dart';
-import 'package:globook_client/presentation/view/login/login_screen.dart';
 import 'package:globook_client/presentation/view/storage/storage_screen.dart';
 import 'package:globook_client/presentation/view/upload/upload_screen.dart';
 import 'package:globook_client/presentation/view_model/root/root_view_model.dart';
@@ -17,7 +17,7 @@ class RootScreen extends BaseScreen<RootViewModel> {
     Center(child: StorageScreen()),
     Center(child: HomeScreen()),
     Center(child: BookStoreScreen()),
-    Center(child: LoginScreen()),
+    Center(child: FavoriteScreen()),
   ];
 
   @override

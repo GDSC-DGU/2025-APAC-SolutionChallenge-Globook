@@ -1,6 +1,4 @@
-enum FileType { pdf, doc, image, other }
-
-enum FileStatus { uploading, translating, completed }
+import 'package:globook_client/domain/enum/Efile.dart';
 
 class UserFile {
   final String id;

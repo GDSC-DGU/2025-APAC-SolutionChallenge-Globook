@@ -5,7 +5,7 @@ import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/presentation/widget/category_books.dart';
 import 'package:globook_client/presentation/widget/current_book.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selector.dart';
-  
+
 import 'package:globook_client/presentation/view_model/home/home_view_model.dart';
 import 'package:globook_client/presentation/widget/styled_button.dart';
 import 'package:get/get.dart';
@@ -30,15 +30,13 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
                   onPressed: () => viewModel.showLanguageSelectionModal(),
                 ),
                 const SizedBox(height: 30),
-                //TODO-[API connection]
-                const CurrentBook(
-                  imageUrl: 'assets/images/current_book.png',
-                  title: 'The Great Gatsby',
-                  author: 'F. Scott Fitzgerald',
+                CurrentBook(
+                  imageUrl: viewModel.currentBook.imageUrl,
+                  title: viewModel.currentBook.title,
+                  author: viewModel.currentBook.author,
                   progress: 0.5,
                 ),
                 const SizedBox(height: 30),
-                //TODO-[API connection]
                 _buildContinueReadingButton(),
                 const SizedBox(height: 40),
                 CategoryBooks(
@@ -62,7 +60,7 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
     return Center(
       child: StyledButton(
         onPressed: () {
-          viewModel.continueReading(viewModel.currentBook);
+          viewModel.continueReading(viewModel.currentBook.id);
         },
         text: 'Continue Reading',
         icon: const Icon(Icons.menu_book, color: Colors.white),

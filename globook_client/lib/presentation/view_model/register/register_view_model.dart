@@ -45,6 +45,6 @@ class RegisterViewModel extends GetxController {
   }
 
   void signup() async {
-    await _loginUseCase.signup(email, password);
+    await _loginUseCase.signup(email, password, passwordCheck);
   }
 }

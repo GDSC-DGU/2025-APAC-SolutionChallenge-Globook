@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'dart:async';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/model/reader.dart';
+import 'package:globook_client/domain/usecase/reader/reader_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -26,6 +27,7 @@ class ReaderViewModel extends GetxController {
   /* -------------------- DI Fields ----------------------- */
   /* ------------------------------------------------------ */
   // TODO: 필요한 UseCase 주입 (예: BookUseCase)
+  final ReaderUseCase _readerUseCase = Get.find<ReaderUseCase>();
 
   /* ------------------------------------------------------ */
   /* ----------------- Private Fields --------------------- */
@@ -77,9 +79,12 @@ class ReaderViewModel extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
     _loadSavedFontSize();
     _loadHighlightColor();
     _loadTextColor();
+
+    
     _loadBook();
     _setupAudioPlayer();
     _loadSampleData();

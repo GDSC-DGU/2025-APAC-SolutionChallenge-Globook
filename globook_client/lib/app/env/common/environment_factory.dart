@@ -6,7 +6,7 @@ abstract class EnvironmentFactory {
 
   static Environment get environment => EnvironmentFactory._environment!;
 
-  // static Future<void> onInit() async {
-  //   _environment = DevEnvironment();
-  // }
+  static Future<void> onInit() async {
+    _environment = DevEnvironment();
+  }
 }
