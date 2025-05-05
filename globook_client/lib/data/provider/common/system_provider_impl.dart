@@ -31,7 +31,7 @@ class SystemProviderImpl implements SystemProvider {
   @override
   Future<void> allocateTokens({
     required String accessToken,
-    required String refreshToken,
+    String? refreshToken,
   }) async {
     await _secureStorage.write(
       key: SystemProviderExt.accessToken,
@@ -61,7 +61,7 @@ class SystemProviderImpl implements SystemProvider {
   /* Default ---------------------------------------------------- */
   /* ------------------------------------------------------------ */
   @override
-  bool get isLogin => _accessToken != null && _refreshToken != null;
+  bool get isLogin => _accessToken != null;
 
   /* ------------------------------------------------------------ */
   /* Getter ----------------------------------------------------- */

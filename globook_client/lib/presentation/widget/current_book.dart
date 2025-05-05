@@ -33,7 +33,7 @@ class CurrentBook extends StatelessWidget {
                 ),
               ],
               image: DecorationImage(
-                image: AssetImage(imageUrl),
+                image: NetworkImage(imageUrl),
                 fit: BoxFit.cover,
               ),
             ),

@@ -7,7 +7,7 @@ abstract class SystemProvider {
   Future<void> onInit();
   Future<void> allocateTokens({
     required String accessToken,
-    required String refreshToken,
+    String? refreshToken,
   });
 
   Future<void> deallocateTokens();

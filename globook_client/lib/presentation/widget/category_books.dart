@@ -113,7 +113,7 @@ class CategoryBooks extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8),
         image: DecorationImage(
-          image: AssetImage(book.imageUrl),
+          image: NetworkImage(book.imageUrl),
           fit: BoxFit.cover,
         ),
         boxShadow: [

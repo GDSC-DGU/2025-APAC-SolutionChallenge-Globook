@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/app/config/color_system.dart';
 import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/presentation/view/login/widget/icon_text_field.dart';
@@ -58,6 +61,16 @@ class RegisterScreen extends BaseScreen<RegisterViewModel> {
             text: 'Sign Up',
           ),
           const SizedBox(height: 20),
+          StyledButton(
+            onPressed: () {
+              Get.offAllNamed(AppRoutes.LOGIN);
+            },
+            height: 60,
+            borderRadius: 20,
+            width: double.infinity,
+            backgroundColor: ColorSystem.load1,
+            text: 'Cancel',
+          ),
         ],
       ),
     ));
