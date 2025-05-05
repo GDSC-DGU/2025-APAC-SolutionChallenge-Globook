@@ -2,10 +2,13 @@
 import 'dart:core';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/domain/model/book.dart';
+import 'package:globook_client/domain/usecase/home/home_usecase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selection_modal.dart';
 import 'package:globook_client/presentation/view/home/widget/language_selector.dart';
+import 'package:globook_client/app/utility/log_util.dart';
 
 class HomeViewModel extends GetxController {
   /* ------------------------------------------------------ */
@@ -27,11 +30,19 @@ class HomeViewModel extends GetxController {
   /* -------------------- DI Fields ----------------------- */
   /* ------------------------------------------------------ */
   // 필요한 UseCase 주입 (예: BookUseCase)
-
+  late final HomeUseCase _homeUseCase;
   /* ------------------------------------------------------ */
   /* ----------------- Private Fields --------------------- */
   /* ------------------------------------------------------ */
-  final RxString _currentBook = RxString('');
+  final Rx<Book> _currentBook = Rx<Book>(const Book(
+    id: '',
+    title: '',
+    author: '',
+    imageUrl: '',
+    description: '',
+    category: '',
+    authorBooks: [],
+  ));
   final RxList<Book> _anotherBooks = RxList<Book>([]);
   final Rx<Language> _selectedSourceLanguage =
       Rx<Language>(const Language(code: 'ENG', name: 'English'));
@@ -41,7 +52,7 @@ class HomeViewModel extends GetxController {
   /* ------------------------------------------------------ */
   /* ----------------- Public Fields ---------------------- */
   /* ------------------------------------------------------ */
-  String get currentBook => _currentBook.value;
+  Book get currentBook => _currentBook.value;
   List<Book> get anotherBooks => _anotherBooks;
   Language get selectedSourceLanguage => _selectedSourceLanguage.value;
   Language get selectedTargetLanguage => _selectedTargetLanguage.value;
@@ -53,13 +64,14 @@ class HomeViewModel extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    // Dependency Injection
-    // _bookUseCase = Get.find<BookUseCase>();
 
-    // 저장된 언어 설정 불러오기
+    // Dependency Injection
+    _homeUseCase = Get.find<HomeUseCase>();
+
+    // Load Language Settings
     await _loadLanguageSettings();
 
-    // 초기 데이터 로드
+    // Initialize Data
     await loadBooks();
   }
 
@@ -89,43 +101,18 @@ class HomeViewModel extends GetxController {
   }
 
   Future<void> loadBooks() async {
-    // 예시 데이터
-    _currentBook.value = '데미안';
+    final lastReadBook = await _homeUseCase.getLastReadBook();
 
-    _anotherBooks.addAll([
-      const Book(
-        id: '1',
-        title: 'Beneath the Wheel',
-        author: '헤르만 헤세',
-        imageUrl: 'assets/books/beneath_the_wheel.jpg',
-        description: '',
-        category: '',
-        authorBooks: [],
-      ),
-      const Book(
-        id: '2',
-        title: 'Crime and Punishment',
-        author: '표도르 도스토예프스키',
-        imageUrl: 'assets/books/crime_and_punishment.jpg',
-        description: '',
-        category: '',
-        authorBooks: [],
-      ),
-      const Book(
-        id: '3',
-        title: 'Foster',
-        author: 'Claire Keegan',
-        imageUrl: 'assets/books/foster.jpg',
-        description: '',
-        category: '',
-        authorBooks: [],
-      ),
-    ]);
+    final libraryBooks = await _homeUseCase.getLibraryBooks();
+
+    _currentBook.value = lastReadBook;
+    _anotherBooks.clear();
+    _anotherBooks.addAll(libraryBooks);
   }
 
   void continueReading(String bookTitle) {
     // 책 읽기 화면으로 이동하는 로직
-    print('Continue reading: $bookTitle');
+    Get.toNamed(AppRoutes.READER, arguments: bookTitle);
   }
 
   void updateSourceLanguage(Language language) {
