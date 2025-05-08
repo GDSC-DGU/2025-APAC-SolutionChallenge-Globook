@@ -6,11 +6,11 @@ import lombok.Builder;
 
 // 도서 찾기랑 보관함 다운로드한 도서 리스트 조회에서 사용
 @Builder(access = AccessLevel.PRIVATE)
-public record BookSearchResponseDto(
+public record BookSummaryResponseDto(
         List<BookThumbnailResponseDto> books
 ) {
-    public static BookSearchResponseDto of(List<BookThumbnailResponseDto> books) {
-        return BookSearchResponseDto.builder()
+    public static BookSummaryResponseDto of(List<BookThumbnailResponseDto> books) {
+        return BookSummaryResponseDto.builder()
                 .books(books)
                 .build();
     }

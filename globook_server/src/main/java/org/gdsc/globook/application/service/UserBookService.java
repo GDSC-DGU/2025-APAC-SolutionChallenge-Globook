@@ -4,11 +4,10 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gdsc.globook.application.dto.BookSearchResponseDto;
+import org.gdsc.globook.application.dto.BookSummaryResponseDto;
 import org.gdsc.globook.application.dto.BookThumbnailResponseDto;
 import org.gdsc.globook.application.dto.FavoriteBookListResponseDto;
 import org.gdsc.globook.application.dto.FavoriteBookThumbnailResponseDto;
-import org.gdsc.globook.application.dto.StatusResponseDto;
 import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.UserBookRepository;
 import org.gdsc.globook.application.repository.UserRepository;
@@ -21,6 +20,7 @@ import org.gdsc.globook.domain.type.ELanguage;
 import org.gdsc.globook.domain.type.EPersona;
 import org.gdsc.globook.domain.type.EUserBookStatus;
 import org.gdsc.globook.presentation.request.UserPreferenceRequestDto;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,17 +104,26 @@ public class UserBookService {
     }
 
     @Transactional(readOnly = true)
-    public BookSearchResponseDto getDownloadedBookList(Long userId) {
+    public BookSummaryResponseDto getDownloadedBookList(Long userId, Integer size) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
 
-        List<UserBook> userBookList = userBookRepository.findByUserAndDownload(user, true);
+        List<UserBook> userBookList;
+        if (size != null) {
+            userBookList = userBookRepository.findByUserAndDownloadIsTrueOrderByCreatedAtDesc(
+                    user,
+                    PageRequest.of(0, size)
+            );
+        } else {
+            userBookList = userBookRepository.findByUserAndDownloadIsTrueOrderByCreatedAtDesc(user);
+        }
+
         List<BookThumbnailResponseDto> downloadedBookList = userBookList.stream()
                 .map(userBook -> BookThumbnailResponseDto.fromEntity(
                         userBook.getBook()
                 )).toList();
 
-        return BookSearchResponseDto.of(
+        return BookSummaryResponseDto.of(
                 downloadedBookList
         );
     }
