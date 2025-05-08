@@ -1,6 +1,7 @@
 package org.gdsc.globook.core.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.core.common.BaseResponse;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.util.List;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
     /**
      * Custom Exception 전용 ExceptionHandler
@@ -92,6 +94,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<BaseResponse<Void>> handleAnyException(RuntimeException e, HttpServletRequest request) {
+        log.error("handleException() in GlobalExceptionHandle throw Exception : {}");
+        e.printStackTrace();
         return convert(GlobalErrorCode.INTERNAL_SERVER_ERROR);
     }
 
@@ -100,6 +104,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BaseResponse<Void>> handleAnyException(Exception e) {
+        log.error("handleException() in GlobalExceptionHandle throw Exception : {}");
+        e.printStackTrace();
         return convert(GlobalErrorCode.INTERNAL_SERVER_ERROR);
     }
 
