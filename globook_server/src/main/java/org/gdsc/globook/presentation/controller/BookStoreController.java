@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.BookDetailResponseDto;
 import org.gdsc.globook.application.dto.BookListResponseDto;
 import org.gdsc.globook.application.dto.BookRandomListResponseDto;
-import org.gdsc.globook.application.dto.BookSearchResponseDto;
+import org.gdsc.globook.application.dto.BookSummaryResponseDto;
 import org.gdsc.globook.application.service.BookStoreService;
 import org.gdsc.globook.core.annotation.AuthenticationPrincipal;
 import org.gdsc.globook.core.common.BaseResponse;
@@ -39,7 +39,7 @@ public class BookStoreController {
     }
 
     @GetMapping("/search")
-    public BaseResponse<BookSearchResponseDto> searchBook(
+    public BaseResponse<BookSummaryResponseDto> searchBook(
             @AuthenticationPrincipal Long userId,
             @RequestParam(value = "title") String title
     ) {

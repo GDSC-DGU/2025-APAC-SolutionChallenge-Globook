@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.BookDetailResponseDto;
 import org.gdsc.globook.application.dto.BookListResponseDto;
 import org.gdsc.globook.application.dto.BookRandomListResponseDto;
-import org.gdsc.globook.application.dto.BookSearchResponseDto;
+import org.gdsc.globook.application.dto.BookSummaryResponseDto;
 import org.gdsc.globook.application.dto.BookThumbnailResponseDto;
 import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.UserRepository;
@@ -76,7 +76,7 @@ public class BookStoreService {
         );
     }
 
-    public BookSearchResponseDto searchBook(Long userId, String title) {
+    public BookSummaryResponseDto searchBook(Long userId, String title) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
 
@@ -86,7 +86,7 @@ public class BookStoreService {
                 .map(BookThumbnailResponseDto::fromEntity)
                 .toList();
 
-        return BookSearchResponseDto.of(bookThumbnailResponseDtoList);
+        return BookSummaryResponseDto.of(bookThumbnailResponseDtoList);
     }
 
     // 서점 - 오늘의 책 조회

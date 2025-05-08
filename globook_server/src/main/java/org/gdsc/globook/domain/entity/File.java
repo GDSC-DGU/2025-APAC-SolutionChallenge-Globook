@@ -53,6 +53,7 @@ public class File {
     private LocalDateTime createdAt;
 
     @Column(name = "persona", nullable = false)
+    @Enumerated(EnumType.STRING)
     private EPersona persona;
 
     @Column(name = "file_status", nullable = false)
