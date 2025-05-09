@@ -1,0 +1,1 @@
+enum TtsGender { male, female }
