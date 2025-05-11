@@ -162,10 +162,10 @@ public class ParagraphService {
         ParagraphInfoResponseDto paragraphsInfo = ParagraphInfoResponseDto.of(
                 file != null ? file.getMaxIndex() : Objects.requireNonNull(userBook).getMaxIndex(),
                 file != null ? file.getId() : userBook.getId(),
+                file != null ? file.getTitle() : userBook.getBook().getTitle(),
                 file != null ? file.getLanguage() : userBook.getLanguage(),
                 file != null ? file.getPersona() : userBook.getPersona()
         );
-
 
         return ParagraphListResponseDto.builder()
                 .paragraphList(paragraphResponseList)

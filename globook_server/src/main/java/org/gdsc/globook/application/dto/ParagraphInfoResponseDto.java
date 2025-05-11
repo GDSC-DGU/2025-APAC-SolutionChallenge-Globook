@@ -10,13 +10,15 @@ import org.gdsc.globook.domain.type.EPersona;
 public record ParagraphInfoResponseDto(
         Long id,
         Long maxIndex,
+        String title,
         String targetLanguage,
         String persona
 ) {
-    public static ParagraphInfoResponseDto of(Long id, Long maxIndex, ELanguage targetLanguage, EPersona persona) {
+    public static ParagraphInfoResponseDto of(Long id, Long maxIndex, String title, ELanguage targetLanguage, EPersona persona) {
         return ParagraphInfoResponseDto.builder()
                 .id(id)
                 .maxIndex(maxIndex)
+                .title(title)
                 .targetLanguage(String.valueOf(targetLanguage))
                 .persona(String.valueOf(persona))
                 .build();
