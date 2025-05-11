@@ -33,13 +33,6 @@ public class MarkdownToParagraphAdapter implements MarkdownToParagraphPort {
                 .body(GeminiResponseDto.class);
 
         log.info(response.toString());
-        String filePath = Paths.get("/Users/mj/Desktop/log/gemini_parsing.txt").toString();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write(response.toString());
-        } catch (IOException e) {
-
-        }
-
         // 2. response 를 매핑 후 return
         ObjectMapper mapper = new ObjectMapper();
         try {

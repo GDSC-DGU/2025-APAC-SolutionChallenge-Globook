@@ -45,13 +45,6 @@ public class TranslateMarkdownAdapter implements TranslateMarkdownPort {
         log.info("이미지를 S3 저장 후 url 을 넘겨받는 중");
         String markdown = convertImageToUrl(userId, fileId, requestDto);
 
-        String filePath_ = Paths.get("/Users/mj/Desktop/log/image_markdown.txt").toString();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath_))) {
-            writer.write(markdown);
-        } catch (IOException e) {
-
-        }
-
         log.info("마크다운을 번역중");
         // 마크다운을 번역중
         GeminiResponseDto response = geminiRestClient.post()
@@ -95,18 +88,6 @@ public class TranslateMarkdownAdapter implements TranslateMarkdownPort {
             String url = entry.getValue();
 
             markdown = markdown.replaceAll("!\\[[^\\]]*]\\(" + fileName + "\\)", "![](" + url + ")");
-        }
-
-        // 테스트용 파일 생성 구문. 배포시 지울 예정
-        try {
-            Files.write(
-                    Path.of("/Users/mj/Downloads/result.md"),
-                    markdown.getBytes(),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.TRUNCATE_EXISTING
-            );
-        } catch (IOException e) {
-            throw new RuntimeException("파일 생성중 예외 발생");
         }
 
         return markdown;
