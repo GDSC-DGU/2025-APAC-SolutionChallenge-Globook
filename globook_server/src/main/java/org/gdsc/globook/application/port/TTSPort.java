@@ -6,8 +6,9 @@ public interface TTSPort {
     String convertTextToSpeech(
             Long userId,
             Long fileId,
-            String inputText,
             Long paragraphId,
-            UploadPdfRequestDto request
+            String inputText,
+            String targetLanguage,
+            String persona
     );
 }

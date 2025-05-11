@@ -100,7 +100,11 @@ public class File {
     }
 
     public void updateStatusFail() {
+        this.fileStatus = EFileStatus.FAIL;
+    }
 
+    public void updateIndex(Long index) {
+        this.index = index;
     }
 
     public void updateMaxIndex(Long maxIndex) {

@@ -5,6 +5,7 @@ import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.PdfToMarkdownResponseDto;
+import org.gdsc.globook.application.dto.PdfToMarkdownResultDto;
 import org.gdsc.globook.application.dto.gemini.GeminiResponseDto;
 import org.gdsc.globook.application.dto.gemini.TranslateGeminiRequestDto;
 import org.gdsc.globook.application.port.TranslateMarkdownPort;
@@ -39,7 +40,7 @@ public class TranslateMarkdownAdapter implements TranslateMarkdownPort {
     public String translateMarkdown(
             Long userId,
             Long fileId,
-            PdfToMarkdownResponseDto requestDto,
+            PdfToMarkdownResultDto requestDto,
             ELanguage targetLanguage
     ) {
         log.info("이미지를 S3 저장 후 url 을 넘겨받는 중");
@@ -66,7 +67,7 @@ public class TranslateMarkdownAdapter implements TranslateMarkdownPort {
     private String convertImageToUrl(
             Long userId,
             Long fileId,
-            PdfToMarkdownResponseDto request
+            PdfToMarkdownResultDto request
     ) {
         String markdown = request.markdown();
         Map<String, String> images = request.images();
@@ -100,7 +101,7 @@ public class TranslateMarkdownAdapter implements TranslateMarkdownPort {
             String imageName
     ) {
         UUID uuid = UUID.randomUUID();
-        String objectName = "user" + userId + "/" + "file" + fileId + "/image/" + imageName + uuid + ".mp3";
+        String objectName = "user" + userId + "/" + "file" + fileId + "/image/" + imageName + uuid;
 
         BlobInfo blobInfo = BlobInfo.newBuilder(BUCKET_NAME, objectName)
                 .setContentType(probeContentType(imageName))
