@@ -34,7 +34,7 @@ public class UserBookController {
     }
 
     // 도서 즐겨찾기 추가
-    @GetMapping("/favorite")
+    @GetMapping("/favorites")
     public BaseResponse<FavoriteBookListResponseDto> getFavoriteBookList(
             @AuthenticationPrincipal Long userId
     ) {

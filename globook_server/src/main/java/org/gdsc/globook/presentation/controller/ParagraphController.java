@@ -41,7 +41,7 @@ public class ParagraphController {
     public ResponseEntity<PdfToMarkdownResponseDto> createParagraphForFileUpload(
             @AuthenticationPrincipal Long userId,
             @RequestPart(value = "file") MultipartFile file,
-            @RequestPart(value = "uploadPdfRequest")UploadPdfRequestDto request
+            @RequestPart(value = "uploadPdfRequest") UploadPdfRequestDto request
     ) {
         // 1. 입력받은 pdf 기반으로 1차적으로 file 레코드 생성 (status 는 '업로드 중')
         Long fileId = fileService.createFile(userId, file, request);
