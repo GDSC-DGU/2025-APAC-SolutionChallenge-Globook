@@ -119,7 +119,7 @@ public class TranslateMarkdownAdapter implements TranslateMarkdownPort {
             String imageName
     ) {
         UUID uuid = UUID.randomUUID();
-        String objectName = "user " + userId + "/" + "file " + fileId + "/image/" + imageName + uuid + ".mp3";
+        String objectName = "user" + userId + "/" + "file" + fileId + "/image/" + imageName + uuid + ".mp3";
 
         BlobInfo blobInfo = BlobInfo.newBuilder(BUCKET_NAME, objectName)
                 .setContentType(probeContentType(imageName))

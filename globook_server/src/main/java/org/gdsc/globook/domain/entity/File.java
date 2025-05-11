@@ -102,4 +102,8 @@ public class File {
     public void updateStatusFail() {
 
     }
+
+    public void updateMaxIndex(Long maxIndex) {
+        this.maxIndex = maxIndex;
+    }
 }

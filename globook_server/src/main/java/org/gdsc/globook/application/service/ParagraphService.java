@@ -2,6 +2,8 @@ package org.gdsc.globook.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.gdsc.globook.application.dto.ParagraphListResponseDto;
+import org.gdsc.globook.application.dto.ParagraphResponseDto;
 import org.gdsc.globook.application.dto.PdfToMarkdownResponseDto;
 import org.gdsc.globook.application.dto.UploadPdfRequestDto;
 import org.gdsc.globook.application.port.MarkdownToParagraphPort;
@@ -68,6 +70,7 @@ public class ParagraphService {
 
         // 2. 마크다운을 문단으로 분리
         List<String> paragraphTextList =  markdownToParagraphPort.convertMarkdownToParagraph(markdown);
+        file.updateMaxIndex((long)paragraphTextList.size());
 
         // 각각의 paragraph 생성중
         for(int index = 0; index < paragraphTextList.size(); index++) {
@@ -83,5 +86,22 @@ public class ParagraphService {
             paragraph.updateAudioUrl(audioUrl);
             file.updateFileStatus();
         }
+    }
+
+    @Transactional(readOnly = true)
+    public ParagraphListResponseDto getParagraphsByIndex(Long fileId, Long index) {
+        long start = Math.max(0, index - 25);
+        long end = index + 25;
+        List<Paragraph> paragraphList = paragraphRepository.findAroundIndexByFileId(fileId, start, end);
+
+        List<ParagraphResponseDto> paragraphResponseList = paragraphList.stream().map(
+                paragraph -> ParagraphResponseDto.builder()
+                        .index(paragraph.getIndex())
+                        .text(paragraph.getContent())
+                        .voiceFile(paragraph.getAudioUrl())
+                        .build()
+        ).toList();
+
+        return new ParagraphListResponseDto(paragraphResponseList);
     }
 }
