@@ -20,6 +20,7 @@ public enum GlobalErrorCode implements ErrorCode{
     INValid(HttpStatus.BAD_REQUEST, "잘못된 요청 헤더입니다."),
     ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 존재하는 데이터입니다."),
     NOT_FOUND_USER_BOOK(HttpStatus.BAD_REQUEST, "존재하지 않는 사용자 도서입니다."),
+    INVALID_REQUEST_TYPE(HttpStatus.BAD_REQUEST, "잘못된 요청 타입입니다."),
 
     /**
      * 401 : 인증 실패

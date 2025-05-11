@@ -65,9 +65,10 @@ public class ParagraphController {
     @GetMapping("/paragraphs")
     public ResponseEntity<ParagraphListResponseDto> getParagraphsByIndex(
             @AuthenticationPrincipal Long userId,
+            @RequestParam String type,
             @RequestParam Long fileId,
             @RequestParam Long index
     ) {
-        return ResponseEntity.ok(paragraphService.getParagraphsByIndex(fileId, index));
+        return ResponseEntity.ok(paragraphService.getParagraphsByIndex(type, fileId, index));
     }
 }

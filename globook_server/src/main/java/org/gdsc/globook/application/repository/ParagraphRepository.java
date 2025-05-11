@@ -20,4 +20,16 @@ public interface ParagraphRepository extends JpaRepository<Paragraph, Long> {
             @Param("end") Long end
     );
 
+    @Query("""
+    SELECT p FROM Paragraph p
+    WHERE p.book.id = :bookId
+    AND p.index BETWEEN :start AND :end
+    ORDER BY p.index ASC
+    """)
+    List<Paragraph> findAroundIndexByBookId(
+            @Param("bookId") Long bookId,
+            @Param("start") Long start,
+            @Param("end") Long end
+    );
+
 }

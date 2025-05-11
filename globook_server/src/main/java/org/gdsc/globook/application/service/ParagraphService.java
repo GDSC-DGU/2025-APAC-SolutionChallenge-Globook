@@ -89,10 +89,19 @@ public class ParagraphService {
     }
 
     @Transactional(readOnly = true)
-    public ParagraphListResponseDto getParagraphsByIndex(Long fileId, Long index) {
+    public ParagraphListResponseDto getParagraphsByIndex(String type, Long fileId, Long index) {
         long start = Math.max(0, index - 25);
         long end = index + 25;
-        List<Paragraph> paragraphList = paragraphRepository.findAroundIndexByFileId(fileId, start, end);
+        List<Paragraph> paragraphList;
+
+        // type에 따라 bookId 또는 fileId로 조회
+        if (type.equals("FILE")) {
+            paragraphList = paragraphRepository.findAroundIndexByFileId(fileId, start, end);
+        } else if (type.equals("BOOK")) {
+            paragraphList = paragraphRepository.findAroundIndexByBookId(fileId, start, end);
+        } else {
+            throw new CustomException(GlobalErrorCode.INVALID_REQUEST_TYPE);
+        }
 
         List<ParagraphResponseDto> paragraphResponseList = paragraphList.stream().map(
                 paragraph -> ParagraphResponseDto.builder()
