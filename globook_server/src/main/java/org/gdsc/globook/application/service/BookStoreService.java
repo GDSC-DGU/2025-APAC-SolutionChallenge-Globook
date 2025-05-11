@@ -90,10 +90,10 @@ public class BookStoreService {
     }
 
     // 서점 - 오늘의 책 조회
-    public BookRandomListResponseDto getTodayBookList(Long userId) {
+    public BookRandomListResponseDto getTodayBookList(Long userId, String category) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
-        List<Book> todayBookList = bookRepository.findRandomBooksLimit3();
+        List<Book> todayBookList = bookRepository.findRandomBooksLimit3(category);
 
         List<BookThumbnailResponseDto> bookThumbnailResponseDtoList = todayBookList.stream()
                 .map(BookThumbnailResponseDto::fromEntity)
