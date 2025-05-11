@@ -73,4 +73,8 @@ public class Paragraph {
                 .file(file)
                 .build();
     }
+
+    public void updateAudioUrl(String audioUrl) {
+        this.audioUrl = audioUrl;
+    }
 }
