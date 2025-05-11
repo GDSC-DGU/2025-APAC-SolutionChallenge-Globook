@@ -43,6 +43,10 @@ jobs:
           mkdir -p globook_server/src/main/resources
           echo "${{ secrets.YML }}" > globook_server/src/main/resources/application.yml
 
+      - name: Restore GCP credentials from Base64
+        run: |
+          echo "${{ secrets.GCP_JSON_B64 }}" | base64 -d > globook_server/src/main/resources/solutionchallenge-globook-a47f1971726c.json
+
       - name: Build with Gradle
         working-directory: globook_server
         run: ./gradlew build -x test
