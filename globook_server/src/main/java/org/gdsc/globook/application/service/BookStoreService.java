@@ -40,7 +40,7 @@ public class BookStoreService {
         }
         bookThumbnailResponseDtoList = bookList
                 .stream()
-                .map(book -> BookThumbnailResponseDto.fromEntity(book, null))
+                .map(book -> BookThumbnailResponseDto.fromEntity(book, Optional.empty()))
                 .toList();
 
         return BookListResponseDto.of(bookThumbnailResponseDtoList);
@@ -83,7 +83,7 @@ public class BookStoreService {
         List<Book> bookList = bookRepository.searchBooksByTitle(title);
         List<BookThumbnailResponseDto> bookThumbnailResponseDtoList = bookList
                 .stream()
-                .map(book -> BookThumbnailResponseDto.fromEntity(book, null))
+                .map(book -> BookThumbnailResponseDto.fromEntity(book, Optional.empty()))
                 .toList();
 
         return BookSummaryResponseDto.of(bookThumbnailResponseDtoList);
@@ -96,7 +96,7 @@ public class BookStoreService {
         List<Book> todayBookList = bookRepository.findRandomBooksLimit3(category);
 
         List<BookThumbnailResponseDto> bookThumbnailResponseDtoList = todayBookList.stream()
-                .map(book -> BookThumbnailResponseDto.fromEntity(book, null))
+                .map(book -> BookThumbnailResponseDto.fromEntity(book, Optional.empty()))
                 .toList();
 
         return BookRandomListResponseDto.of(bookThumbnailResponseDtoList);
