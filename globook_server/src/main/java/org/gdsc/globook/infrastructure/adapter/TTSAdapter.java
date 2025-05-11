@@ -71,7 +71,7 @@ public class TTSAdapter implements TTSPort {
             String audioName
     ) {
         UUID uuid = UUID.randomUUID();
-        String objectName = "user " + userId + "/" + "file " + fileId + "/audio/" + audioName + uuid + ".mp3";
+        String objectName = "user" + userId + "/" + "file" + fileId + "/audio/" + audioName + uuid + ".mp3";
 
         BlobInfo blobInfo = BlobInfo.newBuilder(BUCKET_NAME, objectName)
                 .setContentType("audio/mpeg")

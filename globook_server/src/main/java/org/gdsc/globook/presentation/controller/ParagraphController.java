@@ -1,6 +1,7 @@
 package org.gdsc.globook.presentation.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.gdsc.globook.application.dto.ParagraphListResponseDto;
 import org.gdsc.globook.application.dto.PdfToMarkdownPollingRequestDto;
 import org.gdsc.globook.application.dto.PdfToMarkdownResponseDto;
 import org.gdsc.globook.application.dto.UploadPdfRequestDto;
@@ -13,12 +14,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users/file")
+@RequestMapping("/api/v1/users")
 public class ParagraphController {
     private final FileService fileService;
     private final ParagraphService paragraphService;
 
-    @PostMapping("/all")
+    @PostMapping("/files/all")
     public ResponseEntity<?> createParagraphForFile(
             @AuthenticationPrincipal Long userId,
             @RequestPart(value = "file") MultipartFile file,
@@ -36,7 +37,7 @@ public class ParagraphController {
         return ResponseEntity.ok("task done");
     }
 
-    @PostMapping("/upload")
+    @PostMapping("/files/upload")
     public ResponseEntity<PdfToMarkdownResponseDto> createParagraphForFileUpload(
             @AuthenticationPrincipal Long userId,
             @RequestPart(value = "file") MultipartFile file,
@@ -51,7 +52,7 @@ public class ParagraphController {
         return ResponseEntity.ok().body(markdown);
     }
 
-    @PostMapping("/translate")
+    @PostMapping("/files/translate")
     public ResponseEntity<?> createParagraphForFileTranslate(
             @AuthenticationPrincipal Long userId,
             @RequestBody PdfToMarkdownPollingRequestDto request
@@ -59,5 +60,14 @@ public class ParagraphController {
         // 3. 마크다운을 targetLanguage 로 번역 후 Paragraph 레코드 생성
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/paragraphs")
+    public ResponseEntity<ParagraphListResponseDto> getParagraphsByIndex(
+            @AuthenticationPrincipal Long userId,
+            @RequestParam Long fileId,
+            @RequestParam Long index
+    ) {
+        return ResponseEntity.ok(paragraphService.getParagraphsByIndex(fileId, index));
     }
 }
