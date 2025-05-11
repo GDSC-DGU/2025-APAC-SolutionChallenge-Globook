@@ -111,4 +111,8 @@ public class UserBook {
     public void updateFavorite(Boolean favorite) {
         this.favorite = favorite;
     }
+
+    public void updateStatus(EUserBookStatus status) {
+        this.status = status;
+    }
 }

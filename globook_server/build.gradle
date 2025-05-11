@@ -65,6 +65,7 @@ dependencies {
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 	implementation 'org.reactivestreams:reactive-streams:1.0.4'
+	implementation 'org.springframework:spring-test:6.0.12'
 }
 
 dependencyManagement {
