@@ -27,7 +27,7 @@ public class Paragraph {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "content", nullable = false)
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Column(name = "`index`", nullable = false)

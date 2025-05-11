@@ -28,19 +28,19 @@ public class Book {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false,  length = 100)
     private String title;
 
-    @Column(name = "author", nullable = false)
+    @Column(name = "author", nullable = false,  length = 100)
     private String author;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, length = 1000)
     private String description;
 
-    @Column(name = "image_url", nullable = false)
+    @Column(name = "image_url", nullable = false, length = 2048)
     private String imageUrl;    // 표지 이미지 URL
 
-    @Column(name = "origin_url", nullable = false)
+    @Column(name = "origin_url", nullable = false, length = 2048)
     private String originUrl;    // 도서 원본 URL
 
     @Column(name = "created_at", nullable = false)
