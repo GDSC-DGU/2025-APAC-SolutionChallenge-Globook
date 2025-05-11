@@ -53,6 +53,7 @@ public enum GlobalErrorCode implements ErrorCode{
      * 500 : 응답 실패
      */
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버와의 연결에 실패했습니다."),
+    PDF_FETCH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "PDF 파일을 가져오는 데 실패했습니다."),
     ;
 
     private final HttpStatus status;

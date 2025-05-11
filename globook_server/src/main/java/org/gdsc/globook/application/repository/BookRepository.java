@@ -12,11 +12,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     List<Book> findOtherBooksByCategory(@Param("category") String category, @Param("title") String title);
 
     @Query(value = "SELECT * FROM books b WHERE category = :category", nativeQuery = true)
-    List<Book> findAllByCategory(String category);
+    List<Book> findAllByCategory(@Param("category") String category);
 
     @Query(value = "SELECT * FROM books b WHERE title LIKE CONCAT('%', :title, '%')", nativeQuery = true)
-    List<Book> searchBooksByTitle(String title);
+    List<Book> searchBooksByTitle(@Param("title") String title);
 
-    @Query(value = "SELECT * FROM books ORDER BY RAND() LIMIT 3", nativeQuery = true)
-    List<Book> findRandomBooksLimit3();
+    @Query(value = "SELECT * FROM books b WHERE category = :category ORDER BY RAND() LIMIT 3", nativeQuery = true)
+    List<Book> findRandomBooksLimit3(@Param("category") String category);
 }

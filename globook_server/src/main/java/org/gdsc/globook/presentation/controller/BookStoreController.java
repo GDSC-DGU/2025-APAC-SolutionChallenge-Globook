@@ -48,8 +48,9 @@ public class BookStoreController {
 
     @GetMapping("/today")
     public BaseResponse<BookRandomListResponseDto> getTodayBookList(
-            @AuthenticationPrincipal Long userId
+            @AuthenticationPrincipal Long userId,
+            @RequestParam(value = "category", required = false) String category
     ) {
-        return BaseResponse.success(bookStoreService.getTodayBookList(userId));
+        return BaseResponse.success(bookStoreService.getTodayBookList(userId, category));
     }
 }

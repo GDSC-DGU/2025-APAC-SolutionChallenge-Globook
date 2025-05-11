@@ -1,5 +1,7 @@
 package org.gdsc.globook.application.service;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -8,12 +10,20 @@ import org.gdsc.globook.application.dto.BookSummaryResponseDto;
 import org.gdsc.globook.application.dto.BookThumbnailResponseDto;
 import org.gdsc.globook.application.dto.FavoriteBookListResponseDto;
 import org.gdsc.globook.application.dto.FavoriteBookThumbnailResponseDto;
+import org.gdsc.globook.application.dto.PdfToMarkdownResponseDto;
+import org.gdsc.globook.application.dto.PdfToMarkdownResultDto;
+import org.gdsc.globook.application.port.MarkdownToParagraphPort;
+import org.gdsc.globook.application.port.PdfToMarkdownPort;
+import org.gdsc.globook.application.port.TTSPort;
+import org.gdsc.globook.application.port.TranslateMarkdownPort;
 import org.gdsc.globook.application.repository.BookRepository;
+import org.gdsc.globook.application.repository.ParagraphRepository;
 import org.gdsc.globook.application.repository.UserBookRepository;
 import org.gdsc.globook.application.repository.UserRepository;
 import org.gdsc.globook.core.exception.CustomException;
 import org.gdsc.globook.core.exception.GlobalErrorCode;
 import org.gdsc.globook.domain.entity.Book;
+import org.gdsc.globook.domain.entity.Paragraph;
 import org.gdsc.globook.domain.entity.User;
 import org.gdsc.globook.domain.entity.UserBook;
 import org.gdsc.globook.domain.type.ELanguage;
@@ -23,6 +33,7 @@ import org.gdsc.globook.presentation.request.UserPreferenceRequestDto;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @Slf4j
@@ -31,6 +42,12 @@ public class UserBookService {
     private final UserBookRepository userBookRepository;
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
+    private final PdfFetchService pdfFetchService;
+    private final PdfToMarkdownPort pdfToMarkdownPort;
+    private final TranslateMarkdownPort translateMarkdownPort;
+    private final MarkdownToParagraphPort markdownToParagraphPort;
+    private final ParagraphRepository paragraphRepository;
+    private final TTSPort ttsPort;
 
     public boolean addBookToUserFavorite(Long userId, Long bookId) {
         User user = userRepository.findById(userId)
@@ -62,6 +79,7 @@ public class UserBookService {
         return true;
     }
 
+    @Transactional
     public boolean addBookToUserDownload(Long userId, Long bookId, UserPreferenceRequestDto userPreferenceRequestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
@@ -75,13 +93,59 @@ public class UserBookService {
                 .orElseGet(() -> UserBook.create(
                         book, user, false, false, EUserBookStatus.PROCESSING
                 ));
-
+        userBook.updateStatus(EUserBookStatus.PROCESSING);
         userBook.updatePersona(persona);
         userBook.updateLanguage(language);
-        // userBook.updateMaxIndex(book.getMaxIndex()); <- 이거는 나중에 다운로드할 때 해줘야함
+        userBookRepository.save(userBook);
+
+        // GCS PDF 다운로드 및 MultipartFile 변환
+        MultipartFile bookMultipartFile = getMultipartFileFromBookPdf(book.getOriginUrl());
+
+        // PDF를 마크다운으로 변환
+        PdfToMarkdownResponseDto markdownConversionResult = pdfToMarkdownPort.convertPdfToMarkdown(bookMultipartFile);
+        PdfToMarkdownResultDto pdfToMarkdownResultDto = PdfToMarkdownResultDto.of(
+                markdownConversionResult,
+                book.getId()
+        );
+
+        // 마크다운을 파싱해서 paragraph 객체로 변환
+        // 마크다운 내 이미지 url 처리 & 마크다운을 targetLanguage 로 번역
+        String markdown = translateMarkdownPort.translateMarkdown(
+                userId,
+                bookId,
+                pdfToMarkdownResultDto,
+                language
+        );
+
+        List<String> paragraphTextList =  markdownToParagraphPort.convertMarkdownToParagraph(markdown);
+        userBook.updateMaxIndex((long) paragraphTextList.size());
+
+        // 각각의 paragraph 생성중
+        for(int index = 0; index < paragraphTextList.size(); index++) {
+            // 마크다운을 문단으로 분리후 paragraph 내에 저장
+            String text = paragraphTextList.get(index);
+            Paragraph paragraph = Paragraph.createBookParagraph(text, (long) index,"", book);
+            paragraphRepository.save(paragraph);
+
+            // 각각의 문단을 일반 문자열로 전환 후 paragraph 업데이트
+            String audioUrl = ttsPort.convertTextToSpeech(
+                    userId, bookId, paragraph.getId(), paragraph.getContent(), String.valueOf(language), String.valueOf(persona)
+            );
+            paragraph.updateAudioUrl(audioUrl);
+        }
+
         userBook.updateDownload(true);
+        userBook.updateStatus(EUserBookStatus.READ);
         userBookRepository.save(userBook);
         return true;
+    }
+
+    public MultipartFile getMultipartFileFromBookPdf(String originUrl) {
+        try {
+            return pdfFetchService.fetchPdfAsMultipart(originUrl);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Optional<UserBook> getUserBook(User user, Book book) {
