@@ -40,6 +40,7 @@ public enum GlobalErrorCode implements ErrorCode{
     NOT_SUPPORTED_URI_ERROR(HttpStatus.NOT_FOUND, "지원하지 않는 URL 입니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 데이터입니다."),
     NOT_FOUND_BOOK(HttpStatus.NOT_FOUND, "존재하지 않는 도서입니다."),
+    NOT_FOUND_FILE(HttpStatus.NOT_FOUND, "존재하지 않는 파일입니다."),
 
     /**
      * 405 : 지원하지 않는 HTTP Method

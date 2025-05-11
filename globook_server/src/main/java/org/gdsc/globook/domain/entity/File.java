@@ -90,4 +90,16 @@ public class File {
                 .maxIndex(maxIndex)
                 .build();
     }
+
+    public void updateFileStatus() {
+        if(this.fileStatus == EFileStatus.UPLOAD) {
+            fileStatus = EFileStatus.PROCESSING;
+        } else if(this.fileStatus == EFileStatus.PROCESSING) {
+            fileStatus = EFileStatus.READ;
+        }
+    }
+
+    public void updateStatusFail() {
+
+    }
 }
