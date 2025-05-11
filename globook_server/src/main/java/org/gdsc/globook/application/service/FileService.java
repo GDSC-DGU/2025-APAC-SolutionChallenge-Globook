@@ -30,7 +30,8 @@ public class FileService {
     public Long createFile(
             Long userId,
             MultipartFile file,
-            UploadPdfRequestDto request
+            String targetLanguage,
+            String persona
     ) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(GlobalErrorCode.NOT_FOUND_USER));
@@ -40,9 +41,9 @@ public class FileService {
                 File.create(
                         file.getOriginalFilename(),
                         user,
-                        EPersona.valueOf(request.persona()),
+                        EPersona.valueOf(persona),
                         0L,
-                        ELanguage.valueOf(request.targetLanguage())
+                        ELanguage.valueOf(targetLanguage)
                 )
         ).getId();
     }
@@ -67,5 +68,13 @@ public class FileService {
                 .toList();
 
         return PDFListResponseDto.of(uploadedFiles);
+    }
+
+    @Transactional
+    public void updateFileIndex(Long fileId, Long index) {
+        File file = fileRepository.findById(fileId)
+                .orElseThrow(() -> CustomException.type(GlobalErrorCode.NOT_FOUND_FILE));
+
+        file.updateIndex(index);
     }
 }

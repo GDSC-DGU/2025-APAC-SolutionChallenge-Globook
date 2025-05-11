@@ -33,9 +33,10 @@ public class TTSAdapter implements TTSPort {
     public String convertTextToSpeech(
             Long userId,
             Long fileId,
-            String inputText,
             Long paragraphId,
-            UploadPdfRequestDto request
+            String inputText,
+            String targetLanguage,
+            String persona
     ) {
         // 1. 문자열을 일반화
         inputText = generalizeString(inputText);
@@ -43,8 +44,8 @@ public class TTSAdapter implements TTSPort {
         // 2. 일반화된 문자열에 대해 TTS
         TTSRequestDto ttsRequestDto = TTSRequestDto.from(
                 inputText,
-                ELanguage.valueOf(request.targetLanguage()),
-                EPersona.valueOf(request.persona())
+                ELanguage.valueOf(targetLanguage),
+                EPersona.valueOf(persona)
         );
 
         ResponseEntity<TTSResponseDto> response = ttsRestClient.post()
