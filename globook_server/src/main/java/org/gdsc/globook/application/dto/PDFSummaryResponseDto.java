@@ -10,7 +10,8 @@ public record PDFSummaryResponseDto(
         String title,
         String language,
         String fileStatus,
-        String createdAt
+        String createdAt,
+        Long index
 ) {
     public static PDFSummaryResponseDto of(File file) {
         return PDFSummaryResponseDto.builder()
@@ -19,6 +20,7 @@ public record PDFSummaryResponseDto(
                 .language(String.valueOf(file.getLanguage()))
                 .fileStatus(String.valueOf(file.getFileStatus()))
                 .createdAt(String.valueOf(file.getCreatedAt()))
+                .index(file.getIndex())
                 .build();
     }
 }

@@ -184,7 +184,7 @@ public class UserBookService {
 
         List<BookThumbnailResponseDto> downloadedBookList = userBookList.stream()
                 .map(userBook -> BookThumbnailResponseDto.fromEntity(
-                        userBook.getBook()
+                        userBook.getBook(), Optional.of(userBook)
                 )).toList();
 
         return BookSummaryResponseDto.of(

@@ -1,5 +1,6 @@
 package org.gdsc.globook.application.service;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.*;
@@ -7,12 +8,16 @@ import org.gdsc.globook.application.port.MarkdownToParagraphPort;
 import org.gdsc.globook.application.port.PdfToMarkdownPort;
 import org.gdsc.globook.application.port.TTSPort;
 import org.gdsc.globook.application.port.TranslateMarkdownPort;
+import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.FileRepository;
 import org.gdsc.globook.application.repository.ParagraphRepository;
+import org.gdsc.globook.application.repository.UserBookRepository;
 import org.gdsc.globook.core.exception.CustomException;
 import org.gdsc.globook.core.exception.GlobalErrorCode;
+import org.gdsc.globook.domain.entity.Book;
 import org.gdsc.globook.domain.entity.File;
 import org.gdsc.globook.domain.entity.Paragraph;
+import org.gdsc.globook.domain.entity.UserBook;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +34,7 @@ public class ParagraphService {
     private final TTSPort ttsPort;
     private final FileRepository fileRepository;
     private final ParagraphRepository paragraphRepository;
+    private final UserBookRepository userBookRepository;
 
     @Transactional
     public PdfToMarkdownResultDto convertMarkdown(
@@ -121,6 +127,19 @@ public class ParagraphService {
             default -> throw new CustomException(GlobalErrorCode.INVALID_DIRECTION);
         }
 
+        File file = null;
+        UserBook userBook = null;
+        if (type.equals("FILE")) {
+            file = fileRepository.findById(fileId)
+                    .orElseThrow(() -> CustomException.type(GlobalErrorCode.NOT_FOUND_FILE));
+        }
+        else if (type.equals("BOOK")) {
+            userBook = userBookRepository.findById(fileId)
+                    .orElseThrow(() -> CustomException.type(GlobalErrorCode.NOT_FOUND_BOOK));
+        } else {
+            throw new CustomException(GlobalErrorCode.INVALID_REQUEST_TYPE);
+        }
+
         List<Paragraph> paragraphList;
 
         // type 에 따라 bookId 또는 fileId로 조회
@@ -140,6 +159,17 @@ public class ParagraphService {
                         .build()
         ).toList();
 
-        return new ParagraphListResponseDto(paragraphResponseList);
+        ParagraphInfoResponseDto paragraphsInfo = ParagraphInfoResponseDto.of(
+                file != null ? file.getMaxIndex() : Objects.requireNonNull(userBook).getMaxIndex(),
+                file != null ? file.getId() : userBook.getId(),
+                file != null ? file.getLanguage() : userBook.getLanguage(),
+                file != null ? file.getPersona() : userBook.getPersona()
+        );
+
+
+        return ParagraphListResponseDto.builder()
+                .paragraphList(paragraphResponseList)
+                .paragraphsInfo(paragraphsInfo)
+                .build();
     }
 }
