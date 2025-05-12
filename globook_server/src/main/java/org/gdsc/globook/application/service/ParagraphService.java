@@ -86,6 +86,7 @@ public class ParagraphService {
                 // 블록별로 gemini 호출
                 paragraphTextList.addAll(markdownToParagraphPort.convertMarkdownToParagraph(chunk));
             }
+            log.info("" + paragraphTextList.size());
             file.updateMaxIndex((long)paragraphTextList.size());
 
             // 각각의 paragraph 생성중

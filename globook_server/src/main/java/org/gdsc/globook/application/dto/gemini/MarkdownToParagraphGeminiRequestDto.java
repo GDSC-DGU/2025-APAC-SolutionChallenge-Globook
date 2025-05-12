@@ -14,12 +14,21 @@ public record MarkdownToParagraphGeminiRequestDto(
             = new Part("당신은 마크다운을 문자열 배열로 잘라 반환하는 챗봇입니다. 다른 사족 없이 잘라진 배열로만 반환합니다.");
     private static final Part prompt2
             = new Part("""
-            입력값은 마크다운 문자열로만 주어집니다.
-            다음과 같은 규칙에 따라 마크다운을 문자열 배열로 잘라냅니다.
-            
-            1. 넉넉하게 2문장 크기로 잘라냅니다.
-            2. 마크다운 내 표, 리스트 형태 등 정보를 잘랐을 때 이상해질 것 같은 부분은 따로 자르지 않습니다.
-            3. 어색하지 않고 자연스럽게 잘라내야 하며, 스스로 잘 만들어냈는지 고민해야합니다.
+            The input is a single pure Markdown string.
+            Split the string into an array of segments according to the following rules:
+                        
+            Each segment should contain approximately 2 complete sentences. (Minimum 1, maximum 3 sentences allowed.)
+                        
+            Do not break inside Markdown structures like tables, lists, code blocks, or headings. If a structure may break, include the entire block as-is.
+                        
+            When splitting, ensure the break points feel natural, especially in mixed Korean-English text. Use sentence-ending punctuation (e.g., ., ?, !) as cues.
+                        
+            Preserve all line breaks and spacing exactly as in the original input.
+                        
+            After splitting, review your output and adjust any awkward or incorrect segments to make the result smooth and natural.
+                        
+            ⚠️ Output format: a pure JSON array of strings (e.g., ["chunk1", "chunk2", …]).
+            Do not include any extra explanation, comments, or metadata.
             """);
     private static final List<Part> SYSTEM_PARTS
             = List.of(prompt1, prompt2);
