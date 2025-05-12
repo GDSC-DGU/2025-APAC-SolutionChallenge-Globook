@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 public class RegexBoundarySplitter implements MarkdownSplitterPort {
-    private static final int TOKEN_BUDGET = 5500;
+    private static final int TOKEN_BUDGET = 5000;
     // 분할 지점에 대한 정규표현식
     private static final Pattern SAFE = Pattern.compile(
             "(?m)^\\s*$|^#{1,6}\\s|^[-*+]\\s|^```"
@@ -27,21 +27,20 @@ public class RegexBoundarySplitter implements MarkdownSplitterPort {
         // 전체 문자열을 TOKEN_BUDGET 을 기준으로 반복적으로 분할
         while (start < md.length()) {
             log.info("이거 왜이래 시발 ㅋㅋ. 반복횟수 : " + i);
+
             // 현재 위치에서 대략적인 종료 지점을 계산
             int approxEnd = approxIdx(md, start);
-            Matcher m = SAFE.matcher(md);
-            int cut = -1;
 
-            while (m.find()) {
-                if (m.end() <= approxEnd) {
-                    log.info("여전히 좃됏어요");
-                    cut = m.end();
-                } else {
-                    break;
-                }
+            // ★ 검색 구간을 start ~ approxEnd 로 한정
+            Matcher m = SAFE.matcher(md).region(start, approxEnd);
+
+            int cut = -1;
+            while (m.find()) {          // 중복 탐색 걱정 없음
+                cut = m.end();
             }
+
             // 안전한 지점이 없거나 너무 가까우면 강제로 자름
-            if (cut == -1 || cut == start) {
+            if (cut == -1 || cut <= start) {   // <= 로 방어
                 log.info("아니에요 여기서 좃됏어요");
                 cut = approxEnd;
             }
@@ -52,11 +51,7 @@ public class RegexBoundarySplitter implements MarkdownSplitterPort {
             i++;
         }
 
-        System.out.println(chunks.size());
-        for (String chunk : chunks) {
-            System.out.println(chunk);
-        }
-
+        System.out.println("전체 리스트 사이즈 조회 " + chunks.size());
         return chunks;
     }
 
