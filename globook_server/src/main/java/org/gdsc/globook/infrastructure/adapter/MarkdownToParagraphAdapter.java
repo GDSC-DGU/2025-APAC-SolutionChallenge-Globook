@@ -10,10 +10,7 @@ import org.gdsc.globook.application.port.MarkdownToParagraphPort;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
 
 @Slf4j
