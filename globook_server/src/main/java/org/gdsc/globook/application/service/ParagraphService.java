@@ -1,13 +1,11 @@
 package org.gdsc.globook.application.service;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.*;
-import org.gdsc.globook.application.port.MarkdownToParagraphPort;
-import org.gdsc.globook.application.port.PdfToMarkdownPort;
-import org.gdsc.globook.application.port.TTSPort;
-import org.gdsc.globook.application.port.TranslateMarkdownPort;
+import org.gdsc.globook.application.port.*;
 import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.FileRepository;
 import org.gdsc.globook.application.repository.ParagraphRepository;
@@ -29,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ParagraphService {
     private final PdfToMarkdownPort pdfToMarkdownPort;
+    private final MarkdownSplitterPort markdownSplitterPort;
     private final MarkdownToParagraphPort markdownToParagraphPort;
     private final TranslateMarkdownPort translateMarkdownPort;
     private final TTSPort ttsPort;
@@ -81,8 +80,12 @@ public class ParagraphService {
                     file.getLanguage()
             );
 
-            // 2. 마크다운을 문단으로 분리
-            List<String> paragraphTextList =  markdownToParagraphPort.convertMarkdownToParagraph(markdown);
+            // 2. 너무 긴 마크다운 문자열에 대비하여 7500 토큰 정도씩 split 후 gemini 호출
+            List<String> paragraphTextList = new ArrayList<>();
+            for (String chunk : markdownSplitterPort.split(markdown)) {
+                // 블록별로 gemini 호출
+                paragraphTextList.addAll(markdownToParagraphPort.convertMarkdownToParagraph(chunk));
+            }
             file.updateMaxIndex((long)paragraphTextList.size());
 
             // 각각의 paragraph 생성중
