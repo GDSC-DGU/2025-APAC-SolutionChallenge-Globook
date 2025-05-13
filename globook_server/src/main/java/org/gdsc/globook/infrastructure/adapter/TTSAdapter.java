@@ -3,12 +3,14 @@ package org.gdsc.globook.infrastructure.adapter;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.TTSRequestDto;
 import org.gdsc.globook.application.dto.TTSResponseDto;
 import org.gdsc.globook.application.dto.UploadPdfRequestDto;
 import org.gdsc.globook.application.dto.gemini.GeminiResponseDto;
 import org.gdsc.globook.application.dto.gemini.GeneralizeParagraphRequestDto;
 import org.gdsc.globook.application.port.TTSPort;
+import org.gdsc.globook.core.util.RetryUtils;
 import org.gdsc.globook.domain.type.ELanguage;
 import org.gdsc.globook.domain.type.EPersona;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import org.springframework.web.client.RestClient;
 import java.util.Base64;
 import java.util.UUID;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TTSAdapter implements TTSPort {
@@ -38,6 +41,8 @@ public class TTSAdapter implements TTSPort {
             String targetLanguage,
             String persona
     ) {
+        log.info("문자열을 일반 문자열로 변환 후 번역 중");
+
         // 1. 문자열을 일반화
         inputText = generalizeString(inputText);
 
@@ -48,21 +53,25 @@ public class TTSAdapter implements TTSPort {
                 EPersona.valueOf(persona)
         );
 
-        ResponseEntity<TTSResponseDto> response = ttsRestClient.post()
-                .body(ttsRequestDto)
-                .retrieve()
-                .toEntity(TTSResponseDto.class);
+        TTSResponseDto ttsResponse = RetryUtils.retry(() -> {
+            ResponseEntity<TTSResponseDto> response = ttsRestClient.post()
+                    .body(ttsRequestDto)
+                    .retrieve()
+                    .toEntity(TTSResponseDto.class);
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return uploadAudio(
-                    userId,
-                    fileId,
-                    Base64.getDecoder().decode(response.getBody().audioContent()),
-                    "문단 번호" + paragraphId
-            );
-        } else {
-            throw new IllegalStateException("TTS API 호출 실패: " + response.getStatusCode()); // 커스텀 에러로 변경해야 함
-        }
+            if (response.getStatusCode() == HttpStatus.OK) {
+                return response.getBody();
+            } else {
+                throw new IllegalStateException("TTS API 호출 실패: " + response.getStatusCode());
+            }
+        }, 5, 1000, true);
+
+        return uploadAudio(
+                userId,
+                fileId,
+                Base64.getDecoder().decode(ttsResponse.audioContent()),
+                "문단 번호" + paragraphId
+        );
     }
 
     private String uploadAudio(
@@ -83,11 +92,14 @@ public class TTSAdapter implements TTSPort {
     }
 
     private String generalizeString(String markdown) {
-        GeminiResponseDto response = geminiRestClient.post()
-                .body(GeneralizeParagraphRequestDto.from(markdown))
-                .retrieve()
-                .body(GeminiResponseDto.class);
+        GeminiResponseDto response = RetryUtils.retry(() -> {
+            return geminiRestClient.post()
+                    .body(GeneralizeParagraphRequestDto.from(markdown))
+                    .retrieve()
+                    .body(GeminiResponseDto.class);
+        }, 5, 1000, true);
 
         return response.candidates().getFirst().content().parts().getFirst().text();
     }
+
 }

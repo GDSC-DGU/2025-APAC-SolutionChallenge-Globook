@@ -32,4 +32,6 @@ public interface ParagraphRepository extends JpaRepository<Paragraph, Long> {
             @Param("end") Long end
     );
 
+    @Query("SELECT p FROM Paragraph p WHERE p.file.id = :fileId")
+    List<Paragraph> findAllByFileId(@Param("fileId") Long fileId);
 }
