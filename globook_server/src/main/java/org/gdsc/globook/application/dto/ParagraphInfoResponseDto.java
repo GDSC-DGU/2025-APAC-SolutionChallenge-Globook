@@ -11,14 +11,20 @@ public record ParagraphInfoResponseDto(
         Long id,
         Long maxIndex,
         String title,
+        String type,
+        String imageUrl,
         String targetLanguage,
         String persona
 ) {
-    public static ParagraphInfoResponseDto of(Long id, Long maxIndex, String title, ELanguage targetLanguage, EPersona persona) {
+    public static ParagraphInfoResponseDto of(
+            Long id, Long maxIndex, String title, String type, String imageUrl, ELanguage targetLanguage, EPersona persona
+    ) {
         return ParagraphInfoResponseDto.builder()
                 .id(id)
                 .maxIndex(maxIndex)
                 .title(title)
+                .type(type)
+                .imageUrl(imageUrl)
                 .targetLanguage(String.valueOf(targetLanguage))
                 .persona(String.valueOf(persona))
                 .build();

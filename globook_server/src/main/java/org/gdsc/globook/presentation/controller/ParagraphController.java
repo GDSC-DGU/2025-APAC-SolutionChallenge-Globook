@@ -1,7 +1,8 @@
 package org.gdsc.globook.presentation.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.gdsc.globook.application.dto.*;
+import org.gdsc.globook.application.dto.ParagraphListResponseDto;
+import org.gdsc.globook.application.dto.PdfToMarkdownResultDto;
 import org.gdsc.globook.application.service.FileService;
 import org.gdsc.globook.application.service.ParagraphService;
 import org.gdsc.globook.core.annotation.AuthenticationPrincipal;
