@@ -54,9 +54,6 @@ public class Book {
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBook> userBooks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Paragraph> paragraphs = new ArrayList<>();
-
     @Builder(access = AccessLevel.PRIVATE)
     public Book(String title, String author, String description, String imageUrl, String originUrl, ECategory category) {
         this.title = title;

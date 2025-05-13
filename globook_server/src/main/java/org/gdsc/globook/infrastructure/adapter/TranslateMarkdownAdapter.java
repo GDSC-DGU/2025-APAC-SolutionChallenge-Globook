@@ -26,7 +26,7 @@ public class TranslateMarkdownAdapter implements TranslateMarkdownPort {
         return RetryUtils.retry(() -> {
             GeminiResponseDto response = geminiRestClient.post()
                     .body(TranslateGeminiRequestDto.from(
-                            markdown + "\n\n\n TRANSLATE TO " + targetLanguage.getLanguage()
+                            "TRANSLATE TO " + targetLanguage.getLanguage() + markdown
                     ))
                     .retrieve()
                     .body(GeminiResponseDto.class);

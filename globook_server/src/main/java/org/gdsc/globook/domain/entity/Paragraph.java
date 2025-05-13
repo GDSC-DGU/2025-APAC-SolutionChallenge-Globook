@@ -39,27 +39,27 @@ public class Paragraph {
     // ------ Foreign Key ------ //
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", referencedColumnName = "id")
-    private Book book;  // 도서 id
+    private UserBook userBook;  // 도서 id
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "file_id", referencedColumnName = "id")
     private File file;  // 도서 id
 
     @Builder(access = AccessLevel.PRIVATE)
-    public Paragraph(String content, Long index, String audioUrl, Book book, File file) {
+    public Paragraph(String content, Long index, String audioUrl, UserBook userBook, File file) {
         this.content = content;
         this.index = index;
         this.audioUrl = audioUrl;
-        this.book = book;
+        this.userBook = userBook;
         this.file = file;
     }
 
-    public static Paragraph createBookParagraph(String content, Long index, String audioUrl, Book book) {
+    public static Paragraph createBookParagraph(String content, Long index, String audioUrl, UserBook userBook) {
         return Paragraph.builder()
                 .content(content)
                 .index(index)
                 .audioUrl(audioUrl)
-                .book(book)
+                .userBook(userBook)
                 .file(null)
                 .build();
     }
@@ -69,7 +69,7 @@ public class Paragraph {
                 .content(content)
                 .index(index)
                 .audioUrl(audioUrl)
-                .book(null)
+                .userBook(null)
                 .file(file)
                 .build();
     }

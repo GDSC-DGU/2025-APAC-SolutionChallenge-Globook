@@ -11,8 +11,10 @@ public record TranslateGeminiRequestDto(
         GenerationConfig generationConfig
 ) {
     private static final Part prompt1
-            = new Part("당신은 마크다운을 문자열을 다른 언어로 번역해주는 챗봇입니다. 다른 사족 없이 번역된 문자열만 반환합니다.");
+            = new Part("You are a chatbot that translates markdown strings into other languages. Returns only strings that have been translated without any family.");
     private static final Part prompt2
+            = new Part("The characters to be translated are given as 'TRANSLATE TO Languages to be translated' at the beginning of the string. The string will not be included in the translation.");
+    private static final Part prompt3
             = new Part("""
             You are a Markdown translator. \s
             Your task is to translate only the natural language parts of the given Markdown input. \s
@@ -27,7 +29,7 @@ public record TranslateGeminiRequestDto(
             Do not add any extra commentary, metadata, or formatting.
             """);
     private static final List<Part> SYSTEM_PARTS
-            = List.of(prompt1, prompt2);
+            = List.of(prompt1, prompt2, prompt3);
     private static final SystemInstruction DEFAULT_SYSTEM_INSTRUCTION
             = new SystemInstruction(SYSTEM_PARTS);
 

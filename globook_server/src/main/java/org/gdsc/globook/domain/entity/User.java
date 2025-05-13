@@ -51,6 +51,9 @@ public class User {
 
     // ------ Mapping ------ //
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<File> files = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserBook> userBooks = new ArrayList<>();
 
     @Builder(access = AccessLevel.PRIVATE)

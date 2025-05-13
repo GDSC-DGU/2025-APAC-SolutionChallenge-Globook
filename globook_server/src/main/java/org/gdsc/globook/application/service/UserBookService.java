@@ -1,18 +1,8 @@
 package org.gdsc.globook.application.service;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.gdsc.globook.application.dto.BookSummaryResponseDto;
-import org.gdsc.globook.application.dto.BookThumbnailResponseDto;
-import org.gdsc.globook.application.dto.FavoriteBookListResponseDto;
-import org.gdsc.globook.application.dto.FavoriteBookThumbnailResponseDto;
-import org.gdsc.globook.application.dto.PdfToMarkdownResponseDto;
-import org.gdsc.globook.application.dto.PdfToMarkdownResultDto;
+import org.gdsc.globook.application.dto.*;
 import org.gdsc.globook.application.port.*;
 import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.ParagraphRepository;
@@ -32,6 +22,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Slf4j
@@ -112,46 +109,74 @@ public class UserBookService {
         String markdown = convertImageToUrlPort.convertImageToUrl(
                 userId,
                 userBook.getId(),
-                markdownConversionResult.markdown(),
-                markdownConversionResult.images()
+                pdfToMarkdownResultDto.markdown(),
+                pdfToMarkdownResultDto.images()
         );
 
-        // 2. 너무 긴 마크다운 문자열에 대비해서 일정 토큰 정도 단위로 split 후 translate
+        // 2. 너무 긴 마크다운 문자열에 대비해서 일정 토큰 정도 단위로 split
         List<String> markdownSplitList = markdownSplitterPort.split(markdown);
-        List<String> translatedList = new ArrayList<>();
-        for (String splitMarkdown : markdownSplitList) {
-            String translateMarkdown = translateMarkdownPort.translateMarkdown(
-                    userId,
-                    userBook.getId(),
-                    splitMarkdown,
-                    language
-            );
 
-            translatedList.add(translateMarkdown);
-        }
+        // Executor 한 번만 생성해서 재사용
+        ExecutorService executor = Executors.newFixedThreadPool(10); // 전체 병렬 처리용
 
-        // 3. split 후 번역된 translatedList 에서 블록별로 gemini 호출하여 paragraph 생성
-        List<String> paragraphTextList = new ArrayList<>();
-        for (String chunk : translatedList) {
-            // 블록별로 gemini 호출
-            paragraphTextList.addAll(markdownToParagraphPort.convertMarkdownToParagraph(chunk));
-        }
-        log.info("" + paragraphTextList.size());
+        // 3. 분할된 마크다운에 대해 번역 (병렬 처리)
+        List<CompletableFuture<String>> futuresTranslate = markdownSplitList.stream()
+                .map(splitMarkdown -> CompletableFuture.supplyAsync(() ->
+                        translateMarkdownPort.translateMarkdown(
+                                userId,
+                                userBook.getId(),
+                                splitMarkdown,
+                                language
+                        ), executor)
+                )
+                .toList();
+
+        List<String> translatedList = futuresTranslate.stream()
+                .map(CompletableFuture::join)
+                .toList();
+
+        // 4. 번역된 각 블록에 대해 paragraph 추출 (병렬 처리)
+        List<CompletableFuture<List<String>>> futuresParagraph = translatedList.stream()
+                .map(chunk -> CompletableFuture.supplyAsync(() ->
+                        markdownToParagraphPort.convertMarkdownToParagraph(chunk), executor)
+                )
+                .toList();
+
+        // List<List<String>> → List<String> 평탄화
+        List<String> paragraphTextList = futuresParagraph.stream()
+                .map(CompletableFuture::join)
+                .flatMap(List::stream)
+                .toList();
         userBook.updateMaxIndex((long)paragraphTextList.size());
 
-        // 각각의 paragraph 생성중
-        for(int index = 0; index < paragraphTextList.size(); index++) {
-            // 마크다운을 문단으로 분리후 paragraph 내에 저장
-            String text = paragraphTextList.get(index);
-            Paragraph paragraph = Paragraph.createBookParagraph(text, (long) index,"", book);
+        // 5. 각 paragraph 저장
+        for (int i = 0; i < paragraphTextList.size(); i++) {
+            String text = paragraphTextList.get(i);
+            Paragraph paragraph = Paragraph.createBookParagraph(text, (long) i, "", userBook);
             paragraphRepository.save(paragraph);
-
-            // 각각의 문단을 일반 문자열로 전환 후 paragraph 업데이트
-            String audioUrl = ttsPort.convertTextToSpeech(
-                    userId, bookId, paragraph.getId(), paragraph.getContent(), String.valueOf(language), String.valueOf(persona)
-            );
-            paragraph.updateAudioUrl(audioUrl);
         }
+
+        // 6. TTS 적용 및 update
+        List<Paragraph> paragraphList = paragraphRepository.findAllByBookId(userBook.getId());
+
+        List<CompletableFuture<Void>> futuresTTS = paragraphList.stream()
+                .map(paragraph -> CompletableFuture.runAsync(() -> {
+                    String audioUrl = ttsPort.convertTextToSpeech(
+                            userId,
+                            bookId,
+                            paragraph.getId(),
+                            paragraph.getContent(),
+                            userPreferenceRequestDto.language(),
+                            userPreferenceRequestDto.persona()
+                    );
+                    paragraph.updateAudioUrl(audioUrl);
+                }, executor))
+                .toList();
+
+        futuresTTS.forEach(CompletableFuture::join);
+
+        // 모든 작업 후 스레드 풀 종료
+        executor.shutdown();
 
         userBook.updateDownload(true);
         userBook.updateStatus(EUserBookStatus.READ);

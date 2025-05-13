@@ -22,7 +22,7 @@ public interface ParagraphRepository extends JpaRepository<Paragraph, Long> {
 
     @Query("""
     SELECT p FROM Paragraph p
-    WHERE p.book.id = :bookId
+    WHERE p.userBook.id = :bookId
     AND p.index BETWEEN :start AND :end
     ORDER BY p.index ASC
     """)
@@ -34,4 +34,7 @@ public interface ParagraphRepository extends JpaRepository<Paragraph, Long> {
 
     @Query("SELECT p FROM Paragraph p WHERE p.file.id = :fileId")
     List<Paragraph> findAllByFileId(@Param("fileId") Long fileId);
+
+    @Query("SELECT p FROM Paragraph p WHERE p.file.id = :bookId")
+    List<Paragraph> findAllByBookId(@Param("bookId") Long bookId);
 }
