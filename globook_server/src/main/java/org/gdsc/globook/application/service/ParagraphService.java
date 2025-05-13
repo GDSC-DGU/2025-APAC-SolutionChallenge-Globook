@@ -169,7 +169,10 @@ public class ParagraphService {
             executor.shutdown();
 
             // 정상적으로 변경되었다면 file 의 status 변경
-            file.updateFileStatus();
+            File updateStatusFile = fileRepository.findById(fileId)
+                            .orElseThrow(() -> CustomException.type(GlobalErrorCode.NOT_FOUND_FILE));
+
+            updateStatusFile.updateFileStatus();
         } catch (Exception e) {
             // 정상적으로 변경되지 않은 경우 file 의 status fail 로 변경
             file.updateStatusFail();
