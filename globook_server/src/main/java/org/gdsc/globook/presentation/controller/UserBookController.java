@@ -65,7 +65,7 @@ public class UserBookController {
             @AuthenticationPrincipal Long userId,
             @PathVariable("bookId") Long bookId,
             @RequestBody UserPreferenceRequestDto userPreferenceRequestDto
-            ) {
+    ) {
         return BaseResponse.success(userBookService.addBookToUserDownload(userId, bookId, userPreferenceRequestDto));
     }
 

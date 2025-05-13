@@ -2,6 +2,7 @@ package org.gdsc.globook.application.service;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -12,10 +13,7 @@ import org.gdsc.globook.application.dto.FavoriteBookListResponseDto;
 import org.gdsc.globook.application.dto.FavoriteBookThumbnailResponseDto;
 import org.gdsc.globook.application.dto.PdfToMarkdownResponseDto;
 import org.gdsc.globook.application.dto.PdfToMarkdownResultDto;
-import org.gdsc.globook.application.port.MarkdownToParagraphPort;
-import org.gdsc.globook.application.port.PdfToMarkdownPort;
-import org.gdsc.globook.application.port.TTSPort;
-import org.gdsc.globook.application.port.TranslateMarkdownPort;
+import org.gdsc.globook.application.port.*;
 import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.ParagraphRepository;
 import org.gdsc.globook.application.repository.UserBookRepository;
@@ -46,6 +44,8 @@ public class UserBookService {
     private final PdfToMarkdownPort pdfToMarkdownPort;
     private final TranslateMarkdownPort translateMarkdownPort;
     private final MarkdownToParagraphPort markdownToParagraphPort;
+    private final MarkdownSplitterPort markdownSplitterPort;
+    private final ConvertImageToUrlPort convertImageToUrlPort;
     private final ParagraphRepository paragraphRepository;
     private final TTSPort ttsPort;
 
@@ -108,17 +108,36 @@ public class UserBookService {
                 book.getId()
         );
 
-        // 마크다운을 파싱해서 paragraph 객체로 변환
-        // 마크다운 내 이미지 url 처리 & 마크다운을 targetLanguage 로 번역
-        String markdown = translateMarkdownPort.translateMarkdown(
+        // 1. 마크다운 내 이미지 url 처리
+        String markdown = convertImageToUrlPort.convertImageToUrl(
                 userId,
-                bookId,
-                pdfToMarkdownResultDto,
-                language
+                userBook.getId(),
+                markdownConversionResult.markdown(),
+                markdownConversionResult.images()
         );
 
-        List<String> paragraphTextList =  markdownToParagraphPort.convertMarkdownToParagraph(markdown);
-        userBook.updateMaxIndex((long) paragraphTextList.size());
+        // 2. 너무 긴 마크다운 문자열에 대비해서 일정 토큰 정도 단위로 split 후 translate
+        List<String> markdownSplitList = markdownSplitterPort.split(markdown);
+        List<String> translatedList = new ArrayList<>();
+        for (String splitMarkdown : markdownSplitList) {
+            String translateMarkdown = translateMarkdownPort.translateMarkdown(
+                    userId,
+                    userBook.getId(),
+                    splitMarkdown,
+                    language
+            );
+
+            translatedList.add(translateMarkdown);
+        }
+
+        // 3. split 후 번역된 translatedList 에서 블록별로 gemini 호출하여 paragraph 생성
+        List<String> paragraphTextList = new ArrayList<>();
+        for (String chunk : translatedList) {
+            // 블록별로 gemini 호출
+            paragraphTextList.addAll(markdownToParagraphPort.convertMarkdownToParagraph(chunk));
+        }
+        log.info("" + paragraphTextList.size());
+        userBook.updateMaxIndex((long)paragraphTextList.size());
 
         // 각각의 paragraph 생성중
         for(int index = 0; index < paragraphTextList.size(); index++) {

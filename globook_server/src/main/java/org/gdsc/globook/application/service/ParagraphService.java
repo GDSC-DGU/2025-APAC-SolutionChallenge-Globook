@@ -6,16 +6,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.*;
 import org.gdsc.globook.application.port.*;
-import org.gdsc.globook.application.repository.BookRepository;
 import org.gdsc.globook.application.repository.FileRepository;
 import org.gdsc.globook.application.repository.ParagraphRepository;
 import org.gdsc.globook.application.repository.UserBookRepository;
 import org.gdsc.globook.core.exception.CustomException;
 import org.gdsc.globook.core.exception.GlobalErrorCode;
-import org.gdsc.globook.domain.entity.Book;
 import org.gdsc.globook.domain.entity.File;
 import org.gdsc.globook.domain.entity.Paragraph;
 import org.gdsc.globook.domain.entity.UserBook;
+import org.gdsc.globook.domain.type.ELanguage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,6 +29,7 @@ public class ParagraphService {
     private final MarkdownSplitterPort markdownSplitterPort;
     private final MarkdownToParagraphPort markdownToParagraphPort;
     private final TranslateMarkdownPort translateMarkdownPort;
+    private final ConvertImageToUrlPort convertImageToUrlPort;
     private final TTSPort ttsPort;
     private final FileRepository fileRepository;
     private final ParagraphRepository paragraphRepository;
@@ -72,17 +72,31 @@ public class ParagraphService {
                 .orElseThrow(() -> CustomException.type(GlobalErrorCode.NOT_FOUND_FILE));
 
         try {
-            // 1. 마크다운 내 이미지 url 처리 & 마크다운을 targetLanguage 로 번역
-            String markdown = translateMarkdownPort.translateMarkdown(
+            // 1. 마크다운 내 이미지 url 처리
+            String markdown = convertImageToUrlPort.convertImageToUrl(
                     userId,
                     fileId,
-                    markdownConversionResult,
-                    file.getLanguage()
+                    markdownConversionResult.markdown(),
+                    markdownConversionResult.images()
             );
 
-            // 2. 너무 긴 마크다운 문자열에 대비하여 7500 토큰 정도씩 split 후 gemini 호출
+            // 2. 너무 긴 마크다운 문자열에 대비해서 일정 토큰 정도 단위로 split 후 translate
+            List<String> markdownSplitList = markdownSplitterPort.split(markdown);
+            List<String> translatedList = new ArrayList<>();
+            for (String splitMarkdown : markdownSplitList) {
+                String translateMarkdown = translateMarkdownPort.translateMarkdown(
+                        userId,
+                        fileId,
+                        splitMarkdown,
+                        ELanguage.valueOf(targetLanguage)
+                );
+
+                translatedList.add(translateMarkdown);
+            }
+
+            // 3. split 후 번역된 translatedList 에서 블록별로 gemini 호출하여 paragraph 생성
             List<String> paragraphTextList = new ArrayList<>();
-            for (String chunk : markdownSplitterPort.split(markdown)) {
+            for (String chunk : translatedList) {
                 // 블록별로 gemini 호출
                 paragraphTextList.addAll(markdownToParagraphPort.convertMarkdownToParagraph(chunk));
             }
@@ -91,12 +105,12 @@ public class ParagraphService {
 
             // 각각의 paragraph 생성중
             for(int index = 0; index < paragraphTextList.size(); index++) {
-                // 3. 마크다운을 문단으로 분리후 paragraph 내에 저장
+                // 4. 마크다운을 문단으로 분리후 paragraph 내에 저장
                 String text = paragraphTextList.get(index);
                 Paragraph paragraph = Paragraph.createFileParagraph(text, (long)index,"", file);
                 paragraphRepository.save(paragraph);
 
-                // 4. 각각의 문단을 일반 문자열로 전환 후 paragraph 업데이트
+                // 5. 각각의 문단을 일반 문자열로 전환 후 paragraph 업데이트
                 String audioUrl = ttsPort.convertTextToSpeech(
                         userId, fileId, paragraph.getId(), paragraph.getContent(), targetLanguage, persona
                 );
@@ -164,9 +178,11 @@ public class ParagraphService {
         ).toList();
 
         ParagraphInfoResponseDto paragraphsInfo = ParagraphInfoResponseDto.of(
-                file != null ? file.getMaxIndex() : Objects.requireNonNull(userBook).getMaxIndex(),
                 file != null ? file.getId() : userBook.getId(),
+                file != null ? file.getMaxIndex() : Objects.requireNonNull(userBook).getMaxIndex(),
                 file != null ? file.getTitle() : userBook.getBook().getTitle(),
+                file != null ? "FILE" : "BOOK",
+                file != null ? null : userBook.getBook().getImageUrl(),
                 file != null ? file.getLanguage() : userBook.getLanguage(),
                 file != null ? file.getPersona() : userBook.getPersona()
         );

@@ -7,7 +7,7 @@ public interface TranslateMarkdownPort {
     String translateMarkdown(
             Long userId,
             Long fileId,
-            PdfToMarkdownResultDto markdown,
+            String markdown,
             ELanguage targetLanguage
     );
 }
