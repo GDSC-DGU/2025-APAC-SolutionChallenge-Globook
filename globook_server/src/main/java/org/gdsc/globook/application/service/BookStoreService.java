@@ -69,6 +69,7 @@ public class BookStoreService {
 
         return BookDetailResponseDto.of(
                 book,
+                userBook.map(ub -> ub.getId()).orElse(null),
                 userBook.map(ub -> ub.getStatus().getStatus()).orElse(EUserBookStatus.DOWNLOAD.getStatus()),
                 favorite,
                 bookThumbnailResponseDtoList

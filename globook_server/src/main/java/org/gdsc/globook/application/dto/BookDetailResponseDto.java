@@ -9,6 +9,7 @@ import org.gdsc.globook.domain.type.EUserBookStatus;
 @Builder(access = AccessLevel.PRIVATE)
 public record BookDetailResponseDto(
         Long id,
+        Long userBookId,
         String title,
         String author,
         String description,
@@ -18,10 +19,11 @@ public record BookDetailResponseDto(
         List<BookThumbnailResponseDto> otherBookList
 ) {
     public static BookDetailResponseDto of(
-            Book book, String download, Boolean favorite, List<BookThumbnailResponseDto> bookThumbnailResponseDto
+            Book book, Long userBookId, String download, Boolean favorite, List<BookThumbnailResponseDto> bookThumbnailResponseDto
     ) {
         return BookDetailResponseDto.builder()
                 .id(book.getId())
+                .userBookId(userBookId)
                 .title(book.getTitle())
                 .author(book.getAuthor())
                 .description(book.getDescription())

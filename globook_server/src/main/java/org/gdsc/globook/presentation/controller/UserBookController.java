@@ -65,4 +65,13 @@ public class UserBookController {
 
         return BaseResponse.success(userBookService.addBookToUserDownload(userId, bookId, userPreferenceRequestDto));
     }
+
+    @DeleteMapping("/userBook/{userBookId}")
+    public BaseResponse<?> deleteUserBook(
+            @PathVariable("userBookId") Long userBookId
+    ) {
+        userBookService.deleteUserBook(userBookId);
+
+        return BaseResponse.success(null);
+    }
 }

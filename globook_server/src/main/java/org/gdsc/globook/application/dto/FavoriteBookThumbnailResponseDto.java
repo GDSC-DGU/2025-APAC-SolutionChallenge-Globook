@@ -11,7 +11,7 @@ public record FavoriteBookThumbnailResponseDto(
         String title,
         String author,
         String imageUrl,
-        String status
+        String download
 ) {
     public static FavoriteBookThumbnailResponseDto fromEntity(Book book, UserBook userBook) {
         return FavoriteBookThumbnailResponseDto.builder()
@@ -19,7 +19,7 @@ public record FavoriteBookThumbnailResponseDto(
                 .imageUrl(book.getImageUrl())
                 .title(book.getTitle())
                 .author(book.getAuthor())
-                .status(userBook.getStatus().getStatus())
+                .download(userBook.getStatus().getStatus())
                 .build();
     }
 }

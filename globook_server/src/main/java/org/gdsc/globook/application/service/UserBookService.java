@@ -255,4 +255,11 @@ public class UserBookService {
                 downloadedBookList
         );
     }
+
+    @Transactional
+    public void deleteUserBook(Long userBookId) {
+        UserBook userBook = userBookRepository.findById(userBookId).orElseThrow();
+
+        userBookRepository.delete(userBook);
+    }
 }
