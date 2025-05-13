@@ -2,6 +2,9 @@ package org.gdsc.globook.application.service;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.*;
@@ -20,6 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -34,6 +40,8 @@ public class ParagraphService {
     private final FileRepository fileRepository;
     private final ParagraphRepository paragraphRepository;
     private final UserBookRepository userBookRepository;
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Transactional
     public PdfToMarkdownResultDto convertMarkdown(
@@ -80,42 +88,86 @@ public class ParagraphService {
                     markdownConversionResult.images()
             );
 
-            // 2. 너무 긴 마크다운 문자열에 대비해서 일정 토큰 정도 단위로 split 후 translate
+            // 2. 너무 긴 마크다운 문자열에 대비해서 일정 토큰 정도 단위로 split
             List<String> markdownSplitList = markdownSplitterPort.split(markdown);
-            List<String> translatedList = new ArrayList<>();
-            for (String splitMarkdown : markdownSplitList) {
-                String translateMarkdown = translateMarkdownPort.translateMarkdown(
-                        userId,
-                        fileId,
-                        splitMarkdown,
-                        ELanguage.valueOf(targetLanguage)
-                );
 
-                translatedList.add(translateMarkdown);
+            // Executor 한 번만 생성해서 재사용
+            ExecutorService executor = Executors.newFixedThreadPool(10); // 전체 병렬 처리용
+
+            // 3. 분할된 마크다운에 대해 번역 (병렬 처리)
+            List<CompletableFuture<String>> futuresTranslate = markdownSplitList.stream()
+                    .map(splitMarkdown -> CompletableFuture.supplyAsync(() ->
+                            translateMarkdownPort.translateMarkdown(
+                                    userId,
+                                    fileId,
+                                    splitMarkdown,
+                                    ELanguage.valueOf(targetLanguage)
+                            ), executor)
+                    )
+                    .toList();
+
+            List<String> translatedList = futuresTranslate.stream()
+                    .map(CompletableFuture::join)
+                    .toList();
+
+            log.info("\n\n\n\n\n\n\n\n\n");
+            for (String s : translatedList) {
+                log.info(s);
             }
 
-            // 3. split 후 번역된 translatedList 에서 블록별로 gemini 호출하여 paragraph 생성
-            List<String> paragraphTextList = new ArrayList<>();
-            for (String chunk : translatedList) {
-                // 블록별로 gemini 호출
-                paragraphTextList.addAll(markdownToParagraphPort.convertMarkdownToParagraph(chunk));
-            }
-            log.info("" + paragraphTextList.size());
+            // 4. 번역된 각 블록에 대해 paragraph 추출 (병렬 처리)
+            List<CompletableFuture<List<String>>> futuresParagraph = translatedList.stream()
+                    .map(chunk -> CompletableFuture.supplyAsync(() ->
+                            markdownToParagraphPort.convertMarkdownToParagraph(chunk), executor)
+                    )
+                    .toList();
+
+            // List<List<String>> → List<String> 평탄화
+            List<String> paragraphTextList = futuresParagraph.stream()
+                    .map(CompletableFuture::join)
+                    .flatMap(List::stream)
+                    .toList();
+
+            log.info("paragraph 총 개수: {}", paragraphTextList.size());
             file.updateMaxIndex((long)paragraphTextList.size());
 
-            // 각각의 paragraph 생성중
-            for(int index = 0; index < paragraphTextList.size(); index++) {
-                // 4. 마크다운을 문단으로 분리후 paragraph 내에 저장
-                String text = paragraphTextList.get(index);
-                Paragraph paragraph = Paragraph.createFileParagraph(text, (long)index,"", file);
-                paragraphRepository.save(paragraph);
+            // 5. 각 paragraph 저장
+            int batchSize = 100;
+            for (int i = 0; i < paragraphTextList.size(); i++) {
+                String text = paragraphTextList.get(i);
+                Paragraph paragraph = Paragraph.createFileParagraph(text, (long) i, "", file);
+                entityManager.persist(paragraph);
 
-                // 5. 각각의 문단을 일반 문자열로 전환 후 paragraph 업데이트
-                String audioUrl = ttsPort.convertTextToSpeech(
-                        userId, fileId, paragraph.getId(), paragraph.getContent(), targetLanguage, persona
-                );
-                paragraph.updateAudioUrl(audioUrl);
+                if (i % batchSize == 0 && i > 0) {
+                    entityManager.flush();
+                    entityManager.clear();
+                }
             }
+            entityManager.flush();
+            entityManager.clear();
+
+            // 6. TTS 적용 및 update
+            List<Paragraph> paragraphList = paragraphRepository.findAllByFileId(file.getId());
+
+            List<CompletableFuture<Void>> futuresTTS = paragraphList.stream()
+                    .map(paragraph -> CompletableFuture.runAsync(() -> {
+                        String audioUrl = ttsPort.convertTextToSpeech(
+                                userId,
+                                fileId,
+                                paragraph.getId(),
+                                paragraph.getContent(),
+                                targetLanguage,
+                                persona
+                        );
+                        paragraph.updateAudioUrl(audioUrl);
+                    }, executor))
+                    .toList();
+
+            futuresTTS.forEach(CompletableFuture::join);
+
+            // 모든 작업 후 스레드 풀 종료
+            executor.shutdown();
+
             // 정상적으로 변경되었다면 file 의 status 변경
             file.updateFileStatus();
         } catch (Exception e) {
