@@ -38,7 +38,7 @@ public class Paragraph {
 
     // ------ Foreign Key ------ //
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "book_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_book_id", referencedColumnName = "id")
     private UserBook userBook;  // 도서 id
 
     @ManyToOne(fetch = FetchType.LAZY)

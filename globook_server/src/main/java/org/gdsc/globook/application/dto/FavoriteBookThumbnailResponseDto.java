@@ -19,7 +19,7 @@ public record FavoriteBookThumbnailResponseDto(
                 .imageUrl(book.getImageUrl())
                 .title(book.getTitle())
                 .author(book.getAuthor())
-                .status(String.valueOf(userBook.getStatus()))
+                .status(userBook.getStatus().getStatus())
                 .build();
     }
 }

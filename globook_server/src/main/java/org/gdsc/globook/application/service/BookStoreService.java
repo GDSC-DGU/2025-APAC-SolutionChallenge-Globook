@@ -16,6 +16,7 @@ import org.gdsc.globook.core.exception.GlobalErrorCode;
 import org.gdsc.globook.domain.entity.Book;
 import org.gdsc.globook.domain.entity.User;
 import org.gdsc.globook.domain.entity.UserBook;
+import org.gdsc.globook.domain.type.EUserBookStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -55,10 +56,8 @@ public class BookStoreService {
 
         Optional<UserBook> userBook = userBookService.getUserBook(user, book);
 
-        boolean download = false;
         boolean favorite = false;
         if (userBook.isPresent()) {
-            download = userBook.get().getDownload();
             favorite = userBook.get().getFavorite();
         }
 
@@ -70,7 +69,7 @@ public class BookStoreService {
 
         return BookDetailResponseDto.of(
                 book,
-                download,
+                userBook.map(ub -> ub.getStatus().getStatus()).orElse(EUserBookStatus.DOWNLOAD.getStatus()),
                 favorite,
                 bookThumbnailResponseDtoList
         );

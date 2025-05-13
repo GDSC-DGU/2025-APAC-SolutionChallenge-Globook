@@ -1,12 +1,14 @@
 package org.gdsc.globook.domain.type;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Getter
 public enum EUserBookStatus {
-    DOWNLOAD("다운로드"),
-    PROCESSING("다운로드중"),
-    READ("읽기");
+    DOWNLOAD("download"),
+    PROCESSING("downloading"),
+    READ("read");
 
     private final String status;
 }

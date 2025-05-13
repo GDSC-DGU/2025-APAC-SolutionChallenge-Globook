@@ -4,18 +4,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.BookSummaryResponseDto;
 import org.gdsc.globook.application.dto.FavoriteBookListResponseDto;
+import org.gdsc.globook.application.dto.PdfToMarkdownResultDto;
 import org.gdsc.globook.application.service.UserBookService;
 import org.gdsc.globook.core.annotation.AuthenticationPrincipal;
 import org.gdsc.globook.core.common.BaseResponse;
 import org.gdsc.globook.presentation.request.UserPreferenceRequestDto;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -66,7 +61,8 @@ public class UserBookController {
             @PathVariable("bookId") Long bookId,
             @RequestBody UserPreferenceRequestDto userPreferenceRequestDto
     ) {
+        userBookService.updateUserBookStatus(userId, bookId, userPreferenceRequestDto);
+
         return BaseResponse.success(userBookService.addBookToUserDownload(userId, bookId, userPreferenceRequestDto));
     }
-
 }

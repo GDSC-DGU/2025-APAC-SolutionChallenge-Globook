@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.Builder;
 import org.gdsc.globook.domain.entity.Book;
+import org.gdsc.globook.domain.type.EUserBookStatus;
 
 @Builder(access = AccessLevel.PRIVATE)
 public record BookDetailResponseDto(
@@ -12,12 +13,12 @@ public record BookDetailResponseDto(
         String author,
         String description,
         String imageUrl,
-        boolean download,
+        String download,
         boolean favorite,
         List<BookThumbnailResponseDto> otherBookList
 ) {
     public static BookDetailResponseDto of(
-            Book book, Boolean download, Boolean favorite, List<BookThumbnailResponseDto> bookThumbnailResponseDto
+            Book book, String download, Boolean favorite, List<BookThumbnailResponseDto> bookThumbnailResponseDto
     ) {
         return BookDetailResponseDto.builder()
                 .id(book.getId())

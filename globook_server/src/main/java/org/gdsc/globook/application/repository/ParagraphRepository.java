@@ -35,6 +35,6 @@ public interface ParagraphRepository extends JpaRepository<Paragraph, Long> {
     @Query("SELECT p FROM Paragraph p WHERE p.file.id = :fileId")
     List<Paragraph> findAllByFileId(@Param("fileId") Long fileId);
 
-    @Query("SELECT p FROM Paragraph p WHERE p.file.id = :bookId")
+    @Query("SELECT p FROM Paragraph p WHERE p.userBook.id = :bookId")
     List<Paragraph> findAllByBookId(@Param("bookId") Long bookId);
 }
