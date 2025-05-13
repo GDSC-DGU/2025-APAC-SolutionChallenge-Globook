@@ -62,7 +62,7 @@ public class TTSAdapter implements TTSPort {
             if (response.getStatusCode() == HttpStatus.OK) {
                 return response.getBody();
             } else {
-                throw new IllegalStateException("TTS API 호출 실패: " + response.getStatusCode());
+                throw new IllegalStateException("TTS API 호출 실패: " + response.getStatusCode() + " 실패 시 사용된 메시지 : " + ttsRequestDto.input());
             }
         }, 5, 1000, true);
 
