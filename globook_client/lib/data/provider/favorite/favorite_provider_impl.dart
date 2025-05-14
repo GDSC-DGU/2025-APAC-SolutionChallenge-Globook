@@ -1,3 +1,4 @@
+import 'package:globook_client/app/utility/log_util.dart';
 import 'package:globook_client/core/provider/base_connect.dart';
 import 'package:globook_client/data/model/repsonse_wrapper.dart';
 import 'package:globook_client/domain/model/book.dart';
@@ -6,36 +7,36 @@ import 'package:globook_client/data/provider/favorite/favorite_provider.dart';
 class FavoriteProviderImpl extends BaseConnect implements FavoriteProvider {
   @override
   Future<ResponseWrapper<List<Book>>> getFavoriteBooks() async {
-    return ResponseWrapper(success: true, data: [
-      const Book(
-        id: '1',
-        title: 'Beneath the Wheel',
-        author: '헤르만 헤세',
-        imageUrl: 'assets/books/beneath_the_wheel.jpg',
-        description: '헤르만 헤세의 대표작',
-        category: 'fiction',
-      ),
-      const Book(
-        id: '2',
-        title: 'Crime and Punishment',
-        author: '표도르 도스토예프스키',
-        imageUrl: 'assets/books/crime_and_punishment.jpg',
-        description: '도스토예프스키의 대표작',
-        category: 'fiction',
-      ),
-      const Book(
-        id: '3',
-        title: 'Foster',
-        author: 'Claire Keegan',
-        imageUrl: 'assets/books/foster.jpg',
-        description: 'A thing of finely honed beauty',
-        category: 'fiction',
-      ),
-    ]);
+    final response = await get('/api/v1/users/books/favorites',
+        headers: BaseConnect.usedAuthorization);
+    if (response.statusCode == 200 &&
+        response.body != null &&
+        response.body['success'] == true) {
+      final data = response.body['data'];
+      if (data != null && data['favoriteBooks'] != null) {
+        final books = (data['favoriteBooks'] as List)
+            .map((e) => Book.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return ResponseWrapper(success: true, data: books);
+      } else {
+        return ResponseWrapper(success: true, data: []);
+      }
+    } else {
+      final errorMessage = response.body['message'] ?? '즐겨찾기 목록을 불러오는데 실패했습니다.';
+      handleError(errorMessage);
+      return ResponseWrapper(success: false, data: [], message: errorMessage);
+    }
   }
 
   @override
-  Future<ResponseWrapper<void>> removeFavoriteBook(String bookId) async {
-    return ResponseWrapper(success: true, data: null);
+  Future<ResponseWrapper<void>> removeFavoriteBook(int bookId) async {
+    final response = await delete('/api/v1/users/books/$bookId',
+        headers: BaseConnect.usedAuthorization);
+    if (response.statusCode == 200 && response.body['success'] == true) {
+      return ResponseWrapper(success: true, data: null);
+    }
+    final errorMessage = response.body['message'] ?? '즐겨찾기 제거에 실패했습니다.';
+    handleError(errorMessage);
+    return ResponseWrapper(success: false, data: null, message: errorMessage);
   }
 }

@@ -3,5 +3,5 @@ import 'package:globook_client/domain/model/book.dart';
 
 abstract class FavoriteProvider {
   Future<ResponseWrapper<List<Book>>> getFavoriteBooks();
-  Future<ResponseWrapper<void>> removeFavoriteBook(String bookId);
+  Future<ResponseWrapper<void>> removeFavoriteBook(int bookId);
 }

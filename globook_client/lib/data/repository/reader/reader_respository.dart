@@ -1,7 +1,7 @@
 import 'package:globook_client/domain/model/reader.dart';
 
 abstract class ReaderRepository {
-  Future<TTSMDText> getTTSMDTextFirst(String bookId, int index);
-  Future<TTSMDText> getTTSMDTextBefore(String bookId, int index);
-  Future<TTSMDText> getTTSMDTextAfter(String bookId, int index);
+  Future<ReaderResponse> getTTSMDTextFirst(bool isFile, int fileId, int index);
+  Future<ReaderResponse> getTTSMDTextBefore(bool isFile, int fileId, int index);
+  Future<ReaderResponse> getTTSMDTextAfter(bool isFile, int fileId, int index);
 }

@@ -8,6 +8,8 @@ import 'package:globook_client/presentation/view/favorite/widgets/book_cover.dar
 import 'package:globook_client/presentation/view/favorite/widgets/book_information.dart';
 import 'package:globook_client/presentation/view/favorite/widgets/heart_button.dart';
 import 'package:globook_client/presentation/view_model/favorite/favorite_view_model.dart';
+import 'package:globook_client/presentation/widget/book_read_setting_bottom_sheet.dart';
+import 'package:globook_client/presentation/widget/book_status_button.dart';
 import 'package:globook_client/presentation/widget/styled_button.dart';
 import 'package:globook_client/app/config/app_routes.dart';
 
@@ -38,24 +40,24 @@ class FavoriteScreen extends BaseScreen<FavoriteViewModel> {
     return Obx(
       () => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
-        child: _buildBookList(),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: viewModel.favoriteBooks.length,
+                itemBuilder: (context, index) {
+                  final book = viewModel.favoriteBooks[index];
+                  return _buildBookItem(context, book);
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBookList() {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: viewModel.favoriteBooks.length,
-        itemBuilder: (context, index) {
-          final book = viewModel.favoriteBooks[index];
-          return _buildBookItem(book);
-        },
-      ),
-    );
-  }
-
-  Widget _buildBookItem(Book book) {
+  Widget _buildBookItem(BuildContext context, Book book) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(8),
@@ -73,23 +75,38 @@ class FavoriteScreen extends BaseScreen<FavoriteViewModel> {
           ),
           HeartButton(book: book),
           const SizedBox(width: 8),
-          StyledButton(
-            width: 64,
-            height: 28,
-            onPressed: () {
-              viewModel.readBook(book.id);
+          BookStatusButton(
+            context: context,
+            status: book.downloadStatus,
+            showDownloadBottomSheet: () {
+              _showDownloadBottomSheet(context, book);
             },
-            padding: EdgeInsets.zero,
-            icon: const Icon(
-              Icons.library_books_rounded,
-              size: 13,
-            ),
-            text: 'read',
-            fontSize: 12,
-            backgroundColor: ColorSystem.highlight,
-            textColor: Colors.white,
           ),
         ],
+      ),
+    );
+  }
+
+  void _showDownloadBottomSheet(BuildContext context, Book book) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        maxChildSize: 0.7,
+        minChildSize: 0.3,
+        initialChildSize: 0.5,
+        builder: (context, scrollController) => SingleChildScrollView(
+          controller: scrollController,
+          child: BookReadSettingBottomSheet(
+            isFromUpload: false,
+            bookId: book.id,
+          ),
+        ),
       ),
     );
   }

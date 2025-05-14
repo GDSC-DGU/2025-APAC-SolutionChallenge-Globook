@@ -13,20 +13,26 @@ class ReaderRepositoryImpl extends GetxService implements ReaderRepository {
   }
 
   @override
-  Future<TTSMDText> getTTSMDTextFirst(String bookId, int index) async {
-    final response = await _readerProvider.getTTSMDTextFirst(bookId, index);
+  Future<ReaderResponse> getTTSMDTextFirst(
+      bool isFile, int fileId, int index) async {
+    final response =
+        await _readerProvider.getTTSMDTextFirst(isFile, fileId, index);
     return response.data!;
   }
 
   @override
-  Future<TTSMDText> getTTSMDTextAfter(String bookId, int index) async {
-    final response = await _readerProvider.getTTSMDTextAfter(bookId, index);
+  Future<ReaderResponse> getTTSMDTextAfter(
+      bool isFile, int fileId, int index) async {
+    final response =
+        await _readerProvider.getTTSMDTextAfter(isFile, fileId, index);
     return response.data!;
   }
 
   @override
-  Future<TTSMDText> getTTSMDTextBefore(String bookId, int index) async {
-    final response = await _readerProvider.getTTSMDTextBefore(bookId, index);
+  Future<ReaderResponse> getTTSMDTextBefore(
+      bool isFile, int fileId, int index) async {
+    final response =
+        await _readerProvider.getTTSMDTextBefore(isFile, fileId, index);
     return response.data!;
   }
 }
