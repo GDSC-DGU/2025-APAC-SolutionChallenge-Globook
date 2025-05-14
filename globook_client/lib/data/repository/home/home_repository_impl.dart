@@ -22,8 +22,7 @@ class HomeRepositoryImpl extends GetxService implements HomeRepository {
     return paragraphsInfo ??
         ParagraphsInfo(
           id: -1,
-          title: '읽은 책이 없네요!',
-          
+          title: 'No read books',
           targetLanguage: 'EN',
           persona: 'ETHAN',
           maxIndex: 100,

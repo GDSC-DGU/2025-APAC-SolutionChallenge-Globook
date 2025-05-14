@@ -108,10 +108,45 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
           const SizedBox(width: 16),
           FileInformation(file: file),
           const SizedBox(width: 16),
+          Text(
+            _getTargetLanguageEmoji(file.language),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 16),
           FileStatusButton(file: file),
         ],
       ),
     );
+  }
+
+  String _getTargetLanguageEmoji(String language) {
+    switch (language.toUpperCase()) {
+      case 'EN':
+        return '🇺🇸';
+      case 'KO':
+        return '🇰🇷';
+      case 'JA':
+        return '🇯🇵';
+      case 'ZH':
+        return '🇨🇳';
+      case 'ES':
+        return '🇪🇸';
+      case 'FR':
+        return '��🇷';
+      case 'DE':
+        return '🇩🇪';
+      case 'IT':
+        return '🇮🇹';
+      case 'PT':
+        return '🇵🇹';
+      case 'RU':
+        return '🇷🇺';
+      default:
+        return '';
+    }
   }
 
   Widget _buildUploadButton() {
