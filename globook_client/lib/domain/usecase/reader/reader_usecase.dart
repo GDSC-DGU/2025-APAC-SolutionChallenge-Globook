@@ -14,17 +14,20 @@ class ReaderUseCase extends BaseUseCase implements ReaderRepository {
   }
 
   @override
-  Future<TTSMDText> getTTSMDTextAfter(String bookId, int index) async {
-    return await _readerRepository.getTTSMDTextAfter(bookId, index);
+  Future<ReaderResponse> getTTSMDTextAfter(
+      bool isFile, int fileId, int index) async {
+    return await _readerRepository.getTTSMDTextAfter(isFile, fileId, index);
   }
 
   @override
-  Future<TTSMDText> getTTSMDTextBefore(String bookId, int index) async {
-    return await _readerRepository.getTTSMDTextBefore(bookId, index);
+  Future<ReaderResponse> getTTSMDTextBefore(
+      bool isFile, int fileId, int index) async {
+    return await _readerRepository.getTTSMDTextBefore(isFile, fileId, index);
   }
 
   @override
-  Future<TTSMDText> getTTSMDTextFirst(String bookId, int index) async {
-    return await _readerRepository.getTTSMDTextFirst(bookId, index);
+  Future<ReaderResponse> getTTSMDTextFirst(
+      bool isFile, int fileId, int index) async {
+    return await _readerRepository.getTTSMDTextFirst(isFile, fileId, index);
   }
 }

@@ -103,7 +103,6 @@ class ReaderViewModel extends GetxController {
   void _setupAudioPlayerDebugger() {
     ProcessingState? lastState;
     DateTime? lastStateChangeTime;
-    bool isTransitioning = false;
 
     _audioPlayer.playerStateStream.listen((state) {
       // 동일한 상태가 짧은 시간 내에 반복되는 경우 무시
@@ -121,47 +120,44 @@ class ReaderViewModel extends GetxController {
 
       switch (state.processingState) {
         case ProcessingState.completed:
-          LogUtil.info('오디오 완료!');
-          isTransitioning = true;
-          // 다음 하이라이트로 전환
-          playNextHighlight().then((_) {
-            isTransitioning = false;
-          });
+          LogUtil.info('Audio completed!');
+          // Transition to the next highlight
+          playNextHighlight();
           break;
         case ProcessingState.ready:
-          LogUtil.info('오디오 준비 완료');
+          LogUtil.info('Audio ready...');
           break;
         case ProcessingState.buffering:
-          LogUtil.info('오디오 버퍼링 중...');
+          LogUtil.info('Audio buffering...');
           break;
         case ProcessingState.idle:
-          LogUtil.info('오디오 플레이어 대기 중...');
+          LogUtil.info('Audio player is idle...');
           break;
         case ProcessingState.loading:
-          LogUtil.info('오디오 로딩 중...');
+          LogUtil.info('Audio loading...');
           break;
         default:
-          LogUtil.info('기타 상태: ${state.processingState}');
+          LogUtil.info('Other state: ${state.processingState}');
       }
     });
 
     _audioPlayer.playbackEventStream.listen(
       (event) {
-        // 버퍼링 상태가 아닐 때만 이벤트 로깅
+        // Only log events when not buffering
         if (_audioPlayer.processingState != ProcessingState.buffering) {
           LogUtil.info('Playback event: $event');
         }
       },
       onError: (Object e, StackTrace stackTrace) {
-        LogUtil.error('오디오 플레이어 오류: $e');
-        _playStatus.value = '오류: $e';
+        LogUtil.error('Audio player error: $e');
+        _playStatus.value = 'Error: $e';
       },
     );
   }
 
   Future<void> playTTS() async {
     if (_highlights.isEmpty) {
-      _playStatus.value = '재생할 텍스트가 없습니다';
+      _playStatus.value = 'No text to play';
       return;
     }
 
@@ -175,19 +171,19 @@ class ReaderViewModel extends GetxController {
   Future<void> pauseTTS() async {
     _isPlaying.value = false;
     await _audioPlayer.pause();
-    _playStatus.value = '일시정지';
+    _playStatus.value = 'Paused';
   }
 
   Future<void> playNextHighlight() async {
     if (_highlights.isEmpty) return;
 
-    // 현재 재생 중인 하이라이트의 실제 DB 인덱스 찾기
+    // Find the actual DB index of the currently playing highlight
     final currentHighlight = _highlights.firstWhere(
       (h) => h.index == _currentPlayingIndex.value,
       orElse: () => _highlights.first,
     );
 
-    // 다음 하이라이트 찾기
+    // Find the next highlight
     final nextHighlight = _highlights.firstWhere(
       (h) => h.index > currentHighlight.index,
       orElse: () => currentHighlight,
@@ -199,10 +195,10 @@ class ReaderViewModel extends GetxController {
         await _playCurrentHighlight();
       }
     } else {
-      // 마지막 하이라이트에서 다음으로 넘어갈 때
+      // When transitioning from the last highlight
       _isPlaying.value = false;
       _currentPlayingIndex.value = -1;
-      _playStatus.value = '재생 완료';
+      _playStatus.value = 'Completed';
     }
   }
 
@@ -211,13 +207,13 @@ class ReaderViewModel extends GetxController {
 
     await _audioPlayer.stop();
 
-    // 현재 재생 중인 하이라이트의 실제 DB 인덱스 찾기
+    // Find the actual DB index of the currently playing highlight
     final currentHighlight = _highlights.firstWhere(
       (h) => h.index == _currentPlayingIndex.value,
       orElse: () => _highlights.first,
     );
 
-    // 이전 하이라이트 찾기
+    // Find the previous highlight
     final previousHighlight = _highlights.lastWhere(
       (h) => h.index < currentHighlight.index,
       orElse: () => currentHighlight,
@@ -229,7 +225,7 @@ class ReaderViewModel extends GetxController {
         await _playCurrentHighlight();
       }
     } else {
-      // 첫 번째 하이라이트에서 이전으로 넘어갈 때
+      // When transitioning from the first highlight
       _currentPlayingIndex.value = _highlights.first.index;
       if (_isPlaying.value) {
         await _playCurrentHighlight();
@@ -242,35 +238,35 @@ class ReaderViewModel extends GetxController {
         _currentPlayingIndex.value >= _currentParagraphsInfo.value!.maxIndex) {
       _isPlaying.value = false;
       _currentPlayingIndex.value = -1;
-      _playStatus.value = '재생 완료';
+      _playStatus.value = 'Completed';
       return;
     }
 
-    // 현재 재생 중인 하이라이트 찾기
+    // Find the currently playing highlight
     final highlight = _highlights.firstWhere(
       (h) => h.index == _currentPlayingIndex.value,
       orElse: () => _highlights.first,
     );
 
-    _playStatus.value = '재생 중...';
+    _playStatus.value = 'Playing...';
     setReadingProgress(
         _currentPlayingIndex.value, _currentParagraphsInfo.value!.maxIndex);
 
-    // 현재 재생 위치 저장
+    // Save the current playback position
     if (_currentParagraphsInfo.value != null) {
       await ReaderSharedPreference().saveLastParagraphsInfo(
         _currentParagraphsInfo.value!,
         _currentPlayingIndex.value,
       );
-      LogUtil.debug('재생 위치 저장: ${_currentPlayingIndex.value}');
+      LogUtil.debug('Saved playback position: ${_currentPlayingIndex.value}');
     }
 
     if (highlight.voiceFile.isNotEmpty) {
       try {
-        // 이전 재생 중지
+        // Stop previous playback
         await _audioPlayer.stop();
 
-        // 오디오 소스 설정 및 재생 시작
+        // Set audio source and start playback
         await _audioPlayer.setSpeed(_readingSpeed.value);
         await _audioPlayer.setUrl(
           highlight.voiceFile,
@@ -278,13 +274,13 @@ class ReaderViewModel extends GetxController {
         );
         await _audioPlayer.play();
 
-        LogUtil.info('재생 시작됨');
+        LogUtil.info('Playback started');
       } catch (e) {
-        LogUtil.error('오디오 재생 중 오류 발생: $e');
-        _playStatus.value = '재생 오류';
+        LogUtil.error('Error playing audio: $e');
+        _playStatus.value = 'Playback error';
       }
     } else {
-      _playStatus.value = '음성 파일이 없습니다';
+      _playStatus.value = 'No audio file';
       if (_isPlaying.value) {
         playNextHighlight();
       }
@@ -327,7 +323,7 @@ class ReaderViewModel extends GetxController {
             Color(colorValue).withOpacity(DEFAULT_HIGHLIGHT_OPACITY);
       }
     } catch (e) {
-      LogUtil.error('하이라이트 색상 로드 중 오류 발생: $e');
+      LogUtil.error('Error loading highlight color: $e');
     }
   }
 
@@ -336,7 +332,7 @@ class ReaderViewModel extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(HIGHLIGHT_COLOR_KEY, color.value);
     } catch (e) {
-      LogUtil.error('하이라이트 색상 저장 중 오류 발생: $e');
+      LogUtil.error('Error saving highlight color: $e');
     }
   }
 
@@ -345,7 +341,7 @@ class ReaderViewModel extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(TEXT_COLOR_KEY, color.value);
     } catch (e) {
-      LogUtil.error('텍스트 색상 저장 중 오류 발생: $e');
+      LogUtil.error('Error saving text color: $e');
     }
   }
 
@@ -370,10 +366,11 @@ class ReaderViewModel extends GetxController {
               index > 0 ? index : _currentParagraphsInfo.value!.currentIndex!;
           final maxIndex = _currentParagraphsInfo.value!.maxIndex;
           setReadingProgress(currentIndex, maxIndex);
-          LogUtil.debug('초기 reading progress 설정: $currentIndex / $maxIndex');
+          LogUtil.debug(
+              'Initial reading progress set: $currentIndex / $maxIndex');
         }
 
-        // 현재 책 정보 저장
+        // Save current book info
         await ReaderSharedPreference().saveLastParagraphsInfo(
           response.paragraphsInfo,
           index,
@@ -394,7 +391,7 @@ class ReaderViewModel extends GetxController {
         await prefs.setDouble(FONT_SIZE_KEY, size);
         _fontSize.value = size;
       } catch (e) {
-        LogUtil.error('폰트 크기 저장 중 오류 발생: $e');
+        LogUtil.error('Error saving font size: $e');
       }
     }
   }
@@ -459,7 +456,7 @@ class ReaderViewModel extends GetxController {
         _readingSpeed.value = savedSpeed;
       }
     } catch (e) {
-      LogUtil.error('읽기 속도 로드 중 오류 발생: $e');
+      LogUtil.error('Error loading reading speed: $e');
       _readingSpeed.value = DEFAULT_READING_SPEED;
     }
   }
@@ -471,10 +468,10 @@ class ReaderViewModel extends GetxController {
         await prefs.setDouble(READING_SPEED_KEY, speed);
         _readingSpeed.value = speed;
 
-        // 오디오 플레이어의 재생 속도 업데이트
+        // Update the playback speed of the audio player
         await _audioPlayer.setSpeed(speed);
       } catch (e) {
-        LogUtil.error('읽기 속도 저장 중 오류 발생: $e');
+        LogUtil.error('Error saving reading speed: $e');
       }
     }
   }
