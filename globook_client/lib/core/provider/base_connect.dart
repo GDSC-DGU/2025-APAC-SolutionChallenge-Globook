@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/request/request.dart';
 import 'package:globook_client/app/config/app_routes.dart';
@@ -29,7 +29,8 @@ abstract class BaseConnect extends GetConnect {
     httpClient
       ..baseUrl = _environment.apiServerUrl
       ..defaultContentType = 'application/json; charset=utf-8'
-      ..timeout = const Duration(seconds: 10);
+      ..timeout = const Duration(seconds: 360)
+      ..maxAuthRetries = 3;
 
     httpClient.addRequestModifier<dynamic>((request) {
       // Create a copy of the headers
@@ -47,8 +48,6 @@ abstract class BaseConnect extends GetConnect {
       if (usedAuthorization == "true") {
         headers["Authorization"] = "Bearer ${_systemProvider.getAccessToken()}";
       }
-
-      debugPrint('current accessToken: ${_systemProvider.getAccessToken()}');
 
       // Splash Screen processing
       if (!headers.containsKey("usedInSplashScreen")) {
@@ -159,4 +158,18 @@ abstract class BaseConnect extends GetConnect {
 
   @protected
   String get accessToken => _systemProvider.getAccessToken();
+
+  void handleError(String message) {
+    Get.snackbar(
+      'Error Occured',
+      message,
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.red[100],
+      colorText: Colors.red[900],
+      duration: const Duration(seconds: 2),
+      margin: const EdgeInsets.all(8),
+      borderRadius: 8,
+      icon: const Icon(Icons.error_outline, color: Colors.red),
+    );
+  }
 }
