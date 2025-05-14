@@ -14,20 +14,14 @@ class BookStoreRepositoryImpl extends GetxService
   }
 
   @override
-  Future<List<Book>> getTodayBooks() async {
-    final response = await _bookStoreProvider.getTodayBooks();
+  Future<List<Book>> getTodayBooks(String category) async {
+    final response = await _bookStoreProvider.getTodayBooks(category);
     return response.data!;
   }
 
   @override
-  Future<List<Book>> getNonFictionBooks() async {
-    final response = await _bookStoreProvider.getNonFictionBooks();
-    return response.data!;
-  }
-
-  @override
-  Future<List<Book>> getPhilosophyBooks() async {
-    final response = await _bookStoreProvider.getPhilosophyBooks();
+  Future<Map<String, List<Book>>> getAllCategoryBooks() async {
+    final response = await _bookStoreProvider.getAllCategoryBooks();
     return response.data!;
   }
 }

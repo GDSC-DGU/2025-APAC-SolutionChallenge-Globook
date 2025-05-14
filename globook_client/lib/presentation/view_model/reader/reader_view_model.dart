@@ -1,12 +1,11 @@
-import 'dart:math';
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:globook_client/app/utility/log_util.dart';
 import 'dart:async';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/model/reader.dart';
 import 'package:globook_client/domain/usecase/reader/reader_usecase.dart';
+import 'package:globook_client/presentation/view_model/reader/reader_shared_preference.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -15,41 +14,41 @@ class ReaderViewModel extends GetxController {
   /* ----------------- Static Fields ---------------------- */
   /* ------------------------------------------------------ */
   static const String FONT_SIZE_KEY = 'reader_font_size';
-  static const String HIGHLIGHTS_KEY = 'book_highlights_'; // bookId를 붙여서 사용
   static const String HIGHLIGHT_COLOR_KEY = 'highlight_color';
   static const String TEXT_COLOR_KEY = 'text_color';
+  static const String READING_SPEED_KEY = 'reading_speed';
   static const double DEFAULT_FONT_SIZE = 16.0;
   static const double MIN_FONT_SIZE = 12.0;
   static const double MAX_FONT_SIZE = 24.0;
   static const double DEFAULT_HIGHLIGHT_OPACITY = 0.3;
+  static const double DEFAULT_READING_SPEED = 1.0;
+  static const double MIN_READING_SPEED = 0.5;
+  static const double MAX_READING_SPEED = 2.0;
 
   /* -----------Dependency Injection of UseCase------------ */
   /* -------------------- DI Fields ----------------------- */
   /* ------------------------------------------------------ */
-  // TODO: 필요한 UseCase 주입 (예: BookUseCase)
   final ReaderUseCase _readerUseCase = Get.find<ReaderUseCase>();
 
   /* ------------------------------------------------------ */
   /* ----------------- Private Fields --------------------- */
   /* ------------------------------------------------------ */
   final RxBool _isLoading = false.obs;
+  final RxBool _isLoadingMore = false.obs;
   final RxDouble _fontSize = DEFAULT_FONT_SIZE.obs;
   final Rx<Color> _currentTextColor = Colors.black.obs;
   final Rx<Color> _currentHighlightColor =
       Colors.yellow.withOpacity(DEFAULT_HIGHLIGHT_OPACITY).obs;
   // For Top Bar End------------------------------------------------------
 
-  final RxDouble _readingProgress = 0.6.obs;
-  final RxInt _totalIndex = 0.obs;
+  final RxDouble _readingProgress = 0.0.obs;
   final RxInt _currentPlayingIndex = (-1).obs;
   final RxBool _isPlaying = false.obs;
+  final RxDouble _readingSpeed = DEFAULT_READING_SPEED.obs;
 
   // For Bottom Bar End------------------------------------------------------
 
-  final RxMap<int, String> _pageContents = <int, String>{}.obs;
-  final int _prefetchCount = 30; // 미리 로드할 문장의 수
-  Timer? _scrollDebouncer;
-  final Rx<Book?> _currentBook = Rx<Book?>(null);
+  final Rx<ParagraphsInfo?> _currentParagraphsInfo = Rx<ParagraphsInfo?>(null);
   final RxList<TTSMDText> _highlights = <TTSMDText>[].obs;
   final RxString _playStatus = '준비'.obs;
 
@@ -63,16 +62,17 @@ class ReaderViewModel extends GetxController {
   /* ----------------- Public Fields ---------------------- */
   /* ------------------------------------------------------ */
   bool get isLoading => _isLoading.value;
+  bool get isLoadingMore => _isLoadingMore.value;
   double get fontSize => _fontSize.value;
   double get readingProgress => _readingProgress.value;
-  Book? get currentBook => _currentBook.value;
+  ParagraphsInfo? get currentParagraphsInfo => _currentParagraphsInfo.value;
   List<TTSMDText> get highlights => _highlights;
   Color get currentHighlightColor => _currentHighlightColor.value;
   Color get currentTextColor => _currentTextColor.value;
   bool get isPlaying => _isPlaying.value;
   int get currentPlayingIndex => _currentPlayingIndex.value;
   String get playStatus => _playStatus.value;
-
+  double get readingSpeed => _readingSpeed.value;
   /* ------------------------------------------------------ */
   /* ----------------- Constructor ----------------------- */
   /* ------------------------------------------------------ */
@@ -83,31 +83,80 @@ class ReaderViewModel extends GetxController {
     _loadSavedFontSize();
     _loadHighlightColor();
     _loadTextColor();
+    _loadReadingSpeed();
 
-    
     _loadBook();
-    _setupAudioPlayer();
-    _loadSampleData();
+    _setupAudioPlayerDebugger();
   }
 
   @override
   void onClose() {
-    _scrollDebouncer?.cancel();
-    _audioPlayer.dispose();
+    _audioPlayer.stop().then((_) {
+      _audioPlayer.dispose();
+    });
     super.onClose();
   }
 
   /* ------------------------------------------------------ */
   /* ----------------- Audio Methods --------------------- */
   /* ------------------------------------------------------ */
-  void _setupAudioPlayer() {
+  void _setupAudioPlayerDebugger() {
+    ProcessingState? lastState;
+    DateTime? lastStateChangeTime;
+    bool isTransitioning = false;
+
     _audioPlayer.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        if (_isPlaying.value) {
-          playNextHighlight();
-        }
+      // 동일한 상태가 짧은 시간 내에 반복되는 경우 무시
+      if (lastState == state.processingState &&
+          lastStateChangeTime != null &&
+          DateTime.now().difference(lastStateChangeTime!) <
+              const Duration(milliseconds: 100)) {
+        return;
+      }
+
+      lastState = state.processingState;
+      lastStateChangeTime = DateTime.now();
+
+      LogUtil.info('Player state: ${state.processingState}');
+
+      switch (state.processingState) {
+        case ProcessingState.completed:
+          LogUtil.info('오디오 완료!');
+          isTransitioning = true;
+          // 다음 하이라이트로 전환
+          playNextHighlight().then((_) {
+            isTransitioning = false;
+          });
+          break;
+        case ProcessingState.ready:
+          LogUtil.info('오디오 준비 완료');
+          break;
+        case ProcessingState.buffering:
+          LogUtil.info('오디오 버퍼링 중...');
+          break;
+        case ProcessingState.idle:
+          LogUtil.info('오디오 플레이어 대기 중...');
+          break;
+        case ProcessingState.loading:
+          LogUtil.info('오디오 로딩 중...');
+          break;
+        default:
+          LogUtil.info('기타 상태: ${state.processingState}');
       }
     });
+
+    _audioPlayer.playbackEventStream.listen(
+      (event) {
+        // 버퍼링 상태가 아닐 때만 이벤트 로깅
+        if (_audioPlayer.processingState != ProcessingState.buffering) {
+          LogUtil.info('Playback event: $event');
+        }
+      },
+      onError: (Object e, StackTrace stackTrace) {
+        LogUtil.error('오디오 플레이어 오류: $e');
+        _playStatus.value = '오류: $e';
+      },
+    );
   }
 
   Future<void> playTTS() async {
@@ -132,10 +181,20 @@ class ReaderViewModel extends GetxController {
   Future<void> playNextHighlight() async {
     if (_highlights.isEmpty) return;
 
-    await _audioPlayer.stop();
+    // 현재 재생 중인 하이라이트의 실제 DB 인덱스 찾기
+    final currentHighlight = _highlights.firstWhere(
+      (h) => h.index == _currentPlayingIndex.value,
+      orElse: () => _highlights.first,
+    );
 
-    if (_currentPlayingIndex.value < _highlights.length - 1) {
-      _currentPlayingIndex.value++;
+    // 다음 하이라이트 찾기
+    final nextHighlight = _highlights.firstWhere(
+      (h) => h.index > currentHighlight.index,
+      orElse: () => currentHighlight,
+    );
+
+    if (nextHighlight.index > currentHighlight.index) {
+      _currentPlayingIndex.value = nextHighlight.index;
       if (_isPlaying.value) {
         await _playCurrentHighlight();
       }
@@ -152,14 +211,26 @@ class ReaderViewModel extends GetxController {
 
     await _audioPlayer.stop();
 
-    if (_currentPlayingIndex.value > 0) {
-      _currentPlayingIndex.value--;
+    // 현재 재생 중인 하이라이트의 실제 DB 인덱스 찾기
+    final currentHighlight = _highlights.firstWhere(
+      (h) => h.index == _currentPlayingIndex.value,
+      orElse: () => _highlights.first,
+    );
+
+    // 이전 하이라이트 찾기
+    final previousHighlight = _highlights.lastWhere(
+      (h) => h.index < currentHighlight.index,
+      orElse: () => currentHighlight,
+    );
+
+    if (previousHighlight.index < currentHighlight.index) {
+      _currentPlayingIndex.value = previousHighlight.index;
       if (_isPlaying.value) {
         await _playCurrentHighlight();
       }
     } else {
       // 첫 번째 하이라이트에서 이전으로 넘어갈 때
-      _currentPlayingIndex.value = 0;
+      _currentPlayingIndex.value = _highlights.first.index;
       if (_isPlaying.value) {
         await _playCurrentHighlight();
       }
@@ -168,32 +239,52 @@ class ReaderViewModel extends GetxController {
 
   Future<void> _playCurrentHighlight() async {
     if (_currentPlayingIndex.value < 0 ||
-        _currentPlayingIndex.value >= _highlights.length) {
+        _currentPlayingIndex.value >= _currentParagraphsInfo.value!.maxIndex) {
       _isPlaying.value = false;
       _currentPlayingIndex.value = -1;
       _playStatus.value = '재생 완료';
       return;
     }
 
-    final highlight = _highlights[_currentPlayingIndex.value];
-    _playStatus.value = '재생 중...';
+    // 현재 재생 중인 하이라이트 찾기
+    final highlight = _highlights.firstWhere(
+      (h) => h.index == _currentPlayingIndex.value,
+      orElse: () => _highlights.first,
+    );
 
-    try {
-      if (highlight.voiceFile.isNotEmpty) {
-        await _audioPlayer.setUrl(highlight.voiceFile);
+    _playStatus.value = '재생 중...';
+    setReadingProgress(
+        _currentPlayingIndex.value, _currentParagraphsInfo.value!.maxIndex);
+
+    // 현재 재생 위치 저장
+    if (_currentParagraphsInfo.value != null) {
+      await ReaderSharedPreference().saveLastParagraphsInfo(
+        _currentParagraphsInfo.value!,
+        _currentPlayingIndex.value,
+      );
+      LogUtil.debug('재생 위치 저장: ${_currentPlayingIndex.value}');
+    }
+
+    if (highlight.voiceFile.isNotEmpty) {
+      try {
+        // 이전 재생 중지
+        await _audioPlayer.stop();
+
+        // 오디오 소스 설정 및 재생 시작
+        await _audioPlayer.setSpeed(_readingSpeed.value);
+        await _audioPlayer.setUrl(
+          highlight.voiceFile,
+          preload: true,
+        );
         await _audioPlayer.play();
-      } else {
-        _playStatus.value = '음성 파일이 없습니다';
-        // 300ms 후에 다음 하이라이트로 넘어감
-        await Future.delayed(const Duration(milliseconds: 300));
-        if (_isPlaying.value) {
-          playNextHighlight();
-        }
+
+        LogUtil.info('재생 시작됨');
+      } catch (e) {
+        LogUtil.error('오디오 재생 중 오류 발생: $e');
+        _playStatus.value = '재생 오류';
       }
-    } catch (e) {
-      print('음성 재생 중 오류 발생: $e');
-      _playStatus.value = '오류: $e';
-      await Future.delayed(const Duration(milliseconds: 300));
+    } else {
+      _playStatus.value = '음성 파일이 없습니다';
       if (_isPlaying.value) {
         playNextHighlight();
       }
@@ -211,7 +302,6 @@ class ReaderViewModel extends GetxController {
         _fontSize.value = savedFontSize;
       }
     } catch (e) {
-      print('폰트 크기 로드 중 오류 발생: $e');
       _fontSize.value = DEFAULT_FONT_SIZE;
     }
   }
@@ -224,7 +314,6 @@ class ReaderViewModel extends GetxController {
         _currentTextColor.value = Color(savedTextColor);
       }
     } catch (e) {
-      print('텍스트 색상 로드 중 오류 발생: $e');
       _currentTextColor.value = Colors.black;
     }
   }
@@ -238,7 +327,7 @@ class ReaderViewModel extends GetxController {
             Color(colorValue).withOpacity(DEFAULT_HIGHLIGHT_OPACITY);
       }
     } catch (e) {
-      print('하이라이트 색상 로드 중 오류 발생: $e');
+      LogUtil.error('하이라이트 색상 로드 중 오류 발생: $e');
     }
   }
 
@@ -247,7 +336,7 @@ class ReaderViewModel extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(HIGHLIGHT_COLOR_KEY, color.value);
     } catch (e) {
-      print('하이라이트 색상 저장 중 오류 발생: $e');
+      LogUtil.error('하이라이트 색상 저장 중 오류 발생: $e');
     }
   }
 
@@ -256,7 +345,7 @@ class ReaderViewModel extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(TEXT_COLOR_KEY, color.value);
     } catch (e) {
-      print('텍스트 색상 저장 중 오류 발생: $e');
+      LogUtil.error('텍스트 색상 저장 중 오류 발생: $e');
     }
   }
 
@@ -264,59 +353,35 @@ class ReaderViewModel extends GetxController {
   Future<void> _loadBook() async {
     _isLoading.value = true;
     try {
-      final String? bookId = Get.parameters['bookId'];
-      if (bookId != null) {
-        // TODO: API 호출로 대체
-        _currentBook.value = const Book(
-          id: '1',
-          title: '데미안',
-          author: '헤르만 헤세',
-          imageUrl: 'assets/images/demian.png',
-          description:
-              '『데미안』은 노벨문학상 수상 작가 헤르만 헤세가 1919년에 에밀 싱클레어라는 가명으로 발표한 소설로, 부모님의 품처럼 온화하고 밝은 세계에만 속해 있던 주인공 싱클레어가 처음으로 어둡고 악한 세계에 발을 들이며 겪는 내면의 갈등과 변화를 그린 작품입니다.',
-          category: 'fiction',
+      final int fileId = int.parse(Get.parameters['fileId'] ?? '0');
+      final int index = int.parse(Get.parameters['index'] ?? '0');
+      final String type = Get.parameters['type'] ?? '';
+      LogUtil.info('fileId: $fileId, index: $index, type: $type');
+      if (fileId != -1) {
+        bool isFile = type == 'FILE';
+        final response =
+            await _readerUseCase.getTTSMDTextFirst(isFile, fileId, index);
+        _highlights.value = response.paragraphList;
+        _currentParagraphsInfo.value = response.paragraphsInfo;
+
+        // 최초 진입 시 reading progress 초기화
+        if (_currentParagraphsInfo.value != null) {
+          final currentIndex =
+              index > 0 ? index : _currentParagraphsInfo.value!.currentIndex!;
+          final maxIndex = _currentParagraphsInfo.value!.maxIndex;
+          setReadingProgress(currentIndex, maxIndex);
+          LogUtil.debug('초기 reading progress 설정: $currentIndex / $maxIndex');
+        }
+
+        // 현재 책 정보 저장
+        await ReaderSharedPreference().saveLastParagraphsInfo(
+          response.paragraphsInfo,
+          index,
         );
-        _highlights.value = _sampleHighlights;
-        _initializeTestData();
       }
     } finally {
       _isLoading.value = false;
     }
-  }
-
-  void _initializeTestData() {
-    _totalIndex.value = _sampleHighlights.length;
-    _loadPagesWithPrefetch(0);
-  }
-
-  // Load Initial Data End------------------------------------------------------
-  Future<void> _loadPagesWithPrefetch(int currentPage) async {
-    int startPage = max(0, currentPage - _prefetchCount);
-    int endPage = min(_totalIndex.value - 1, currentPage + _prefetchCount);
-    await _loadPages(startPage, endPage);
-  }
-
-  Future<void> _loadPages(int startIndex, int endIndex) async {
-    List<Future> futures = [];
-    for (int i = startIndex; i <= endIndex; i++) {
-      if (i >= 0 && i < _totalIndex.value && !_pageContents.containsKey(i)) {
-        futures.add(_getPageContent(i).then((content) {
-          _pageContents[i] = content;
-        }));
-      }
-    }
-    await Future.wait(futures);
-  }
-
-  Future<int> _getTotalPages(String bookId) async {
-    return _sampleHighlights.length;
-  }
-
-  Future<String> _getPageContent(int pageNumber) async {
-    if (pageNumber >= 0 && pageNumber < _sampleHighlights.length) {
-      return _sampleHighlights[pageNumber].text;
-    }
-    return '';
   }
 
   /* ------------------------------------------------------ */
@@ -329,7 +394,7 @@ class ReaderViewModel extends GetxController {
         await prefs.setDouble(FONT_SIZE_KEY, size);
         _fontSize.value = size;
       } catch (e) {
-        print('폰트 크기 저장 중 오류 발생: $e');
+        LogUtil.error('폰트 크기 저장 중 오류 발생: $e');
       }
     }
   }
@@ -348,8 +413,8 @@ class ReaderViewModel extends GetxController {
 
   // Font 설정 끝 ------------------------------------------------------
 
-  void setReadingProgress(double progress) {
-    _readingProgress.value = progress;
+  void setReadingProgress(int currentIndex, int maxIndex) {
+    _readingProgress.value = currentIndex / maxIndex;
   }
 
   Future<void> setHighlightColor(Color color) async {
@@ -362,25 +427,23 @@ class ReaderViewModel extends GetxController {
     await _saveTextColor(color);
   }
 
-  Future<void> loadInitialContent(String bookId) async {
-    _isLoading.value = true;
-    try {
-      _totalIndex.value = await _getTotalPages(bookId);
-      await _loadPagesWithPrefetch(_currentPlayingIndex.value);
-    } finally {
-      _isLoading.value = false;
+  void onScroll(double maxScroll, double currentScroll, double screenHeight) {
+    if (_isLoadingMore.value) return;
+
+    final delta = screenHeight * 0.2; // 화면 높이의 20%
+
+    // 아래로 스크롤하여 끝에 가까워질 때
+    if (maxScroll - currentScroll <= delta) {
+      loadMoreAfter();
+    }
+    // 위로 스크롤하여 시작에 가까워질 때
+    if (currentScroll <= delta) {
+      loadMoreBefore();
     }
   }
 
-  void onScroll(double scrollPosition) {
-    _scrollDebouncer?.cancel();
-    _scrollDebouncer = Timer(const Duration(milliseconds: 300), () {
-      // int newIndex = (scrollPosition / _pageSize).floor();
-    });
-  }
-
   Future<void> playHighlight(TTSMDText highlight) async {
-    final index = _highlights.indexOf(highlight);
+    final index = highlight.index;
     if (index == -1) return;
 
     _currentPlayingIndex.value = index;
@@ -388,104 +451,87 @@ class ReaderViewModel extends GetxController {
     await _playCurrentHighlight();
   }
 
-  /* ------------------------------------------------------ */
-  /* ----------------- Sample Data ----------------------- */
-  /* ------------------------------------------------------ */
-  final List<TTSMDText> _sampleHighlights = [
-    TTSMDText(
-      index: 0,
-      text: "# 1장: 새로운 시작",
-      voiceFile: "https://example.com/voice1.mp3",
-    ),
-    TTSMDText(
-      index: 1,
-      text: "이것은 첫 번째 페이지의 내용입니다. 여기서는 책의 시작을 알리는 중요한 내용이 담겨있습니다.",
-      voiceFile: "https://example.com/voice2.mp3",
-    ),
-    TTSMDText(
-      index: 2,
-      text: "## 첫 번째 섹션",
-      voiceFile: "https://example.com/voice3.mp3",
-    ),
-    TTSMDText(
-      index: 3,
-      text: "이 섹션에서는 주요 등장인물들의 소개가 이루어집니다. 각 캐릭터의 성격과 배경이 자세히 설명됩니다.",
-      voiceFile: "https://example.com/voice4.mp3",
-    ),
-    TTSMDText(
-      index: 4,
-      text: "# 2장: 모험의 시작",
-      voiceFile: "https://example.com/voice5.mp3",
-    ),
-    TTSMDText(
-      index: 5,
-      text: "두 번째 페이지에서는 본격적인 모험이 시작됩니다. 주인공은 첫 번째 시련에 직면하게 됩니다.",
-      voiceFile: "https://example.com/voice6.mp3",
-    ),
-    TTSMDText(
-      index: 6,
-      text: "## 첫 번째 시련",
-      voiceFile: "https://example.com/voice7.mp3",
-    ),
-    TTSMDText(
-      index: 7,
-      text: "주인공은 어려운 선택을 해야 합니다. 이 선택이 이후의 이야기에 큰 영향을 미치게 됩니다.",
-      voiceFile: "https://example.com/voice8.mp3",
-    ),
-    TTSMDText(
-      index: 8,
-      text: "# 3장: 새로운 동맹",
-      voiceFile: "https://example.com/voice9.mp3",
-    ),
-    TTSMDText(
-      index: 9,
-      text: "세 번째 페이지에서는 새로운 동맹이 등장합니다. 이들은 주인공의 여정에 큰 도움이 될 것입니다.",
-      voiceFile: "https://example.com/voice10.mp3",
-    ),
-    TTSMDText(
-      index: 10,
-      text: "## 새로운 친구들",
-      voiceFile: "https://example.com/voice11.mp3",
-    ),
-    TTSMDText(
-      index: 11,
-      text: "# 4장: 위험한 여정",
-      voiceFile: "https://example.com/voice12.mp3",
-    ),
-    TTSMDText(
-      index: 12,
-      text: "네 번째 페이지에서는 위험한 여정이 시작됩니다. 주인공과 동료들은 여러 시련을 겪게 됩니다.",
-      voiceFile: "https://example.com/voice13.mp3",
-    ),
-    TTSMDText(
-      index: 13,
-      text: "## 위험한 상황들",
-      voiceFile: "https://example.com/voice14.mp3",
-    ),
-    TTSMDText(
-      index: 14,
-      text: "# 5장: 결말",
-      voiceFile: "https://example.com/voice15.mp3",
-    ),
-    TTSMDText(
-      index: 15,
-      text: "마지막 페이지에서는 모든 이야기가 마무리됩니다. 주인공은 자신의 목표를 달성하고 성장합니다.",
-      voiceFile: "https://example.com/voice16.mp3",
-    ),
-    TTSMDText(
-      index: 16,
-      text: "## 교훈",
-      voiceFile: "https://example.com/voice17.mp3",
-    ),
-    TTSMDText(
-      index: 17,
-      text:
-          "이 책은 모험과 성장의 이야기를 담고 있습니다. 주인공의 여정을 통해 독자는 자신의 목표를 이루고 성장할 수 있는 힘을 발견할 것입니다.",
-      voiceFile: "https://example.com/voice18.mp3",
-    ),
-  ];
+  Future<void> _loadReadingSpeed() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedSpeed = prefs.getDouble(READING_SPEED_KEY);
+      if (savedSpeed != null) {
+        _readingSpeed.value = savedSpeed;
+      }
+    } catch (e) {
+      LogUtil.error('읽기 속도 로드 중 오류 발생: $e');
+      _readingSpeed.value = DEFAULT_READING_SPEED;
+    }
+  }
 
-  void _loadSampleData() {
-    _highlights.value = _sampleHighlights;
+  Future<void> setReadingSpeed(double speed) async {
+    if (speed >= MIN_READING_SPEED && speed <= MAX_READING_SPEED) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setDouble(READING_SPEED_KEY, speed);
+        _readingSpeed.value = speed;
+
+        // 오디오 플레이어의 재생 속도 업데이트
+        await _audioPlayer.setSpeed(speed);
+      } catch (e) {
+        LogUtil.error('읽기 속도 저장 중 오류 발생: $e');
+      }
+    }
+  }
+
+  void addHighlights(List<TTSMDText> newHighlights) {
+    _highlights.addAll(newHighlights);
+  }
+
+  void insertHighlights(List<TTSMDText> newHighlights) {
+    _highlights.insertAll(0, newHighlights);
+  }
+
+  Future<void> loadMoreAfter() async {
+    if (_isLoadingMore.value) return;
+    _isLoadingMore.value = true;
+
+    try {
+      if (_highlights.isNotEmpty) {
+        final lastIndex = _highlights.last.index;
+        final fileId = int.parse(Get.parameters['fileId'] ?? '0');
+
+        if (fileId != 0) {
+          final response = await _readerUseCase.getTTSMDTextAfter(
+              _currentParagraphsInfo.value!.type == 'FILE', fileId, lastIndex);
+          if (response.paragraphList.isNotEmpty) {
+            _highlights.addAll(response.paragraphList);
+          }
+        }
+      }
+    } finally {
+      _isLoadingMore.value = false;
+    }
+  }
+
+  Future<void> loadMoreBefore() async {
+    if (_isLoadingMore.value) return;
+    _isLoadingMore.value = true;
+
+    try {
+      if (_highlights.isNotEmpty) {
+        final firstIndex = _highlights.first.index;
+        final fileId = int.parse(Get.parameters['fileId'] ?? '0');
+
+        if (fileId != 0 && firstIndex > 0) {
+          final response = await _readerUseCase.getTTSMDTextBefore(
+              _currentParagraphsInfo.value!.type == 'FILE', fileId, firstIndex);
+          if (response.paragraphList.isNotEmpty) {
+            _highlights.insertAll(0, response.paragraphList);
+          }
+        }
+      }
+    } finally {
+      _isLoadingMore.value = false;
+    }
+  }
+
+  Future<ParagraphsInfo?> getLastParagraphsInfo() async {
+    return await ReaderSharedPreference().loadLastParagraphsInfo();
   }
 }

@@ -22,7 +22,7 @@ class LoginRepositoryImpl extends GetxService implements LoginRepository {
       await StorageFactory.systemProvider.allocateTokens(
         accessToken: response.data ?? '',
       );
-      Get.offNamed(AppRoutes.ROOT);
+      Get.offAllNamed(AppRoutes.ROOT);
     }
   }
 
