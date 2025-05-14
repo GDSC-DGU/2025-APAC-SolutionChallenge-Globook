@@ -20,12 +20,12 @@ class FavoriteRepositoryImpl extends GetxService implements FavoriteRepository {
   }
 
   @override
-  Future<void> removeFavoriteBook(String bookId) async {
+  Future<void> removeFavoriteBook(int bookId) async {
     await _favoriteProvider.removeFavoriteBook(bookId);
   }
 
   @override
-  Future<void> readBook(String bookId) async {
+  Future<void> readBook(int bookId) async {
     Get.toNamed(AppRoutes.READER, arguments: bookId);
   }
 }

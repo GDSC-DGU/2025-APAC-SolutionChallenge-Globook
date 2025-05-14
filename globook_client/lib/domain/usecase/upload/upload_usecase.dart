@@ -20,7 +20,7 @@ class UploadUseCase extends BaseUseCase implements UploadRepository {
   }
 
   @override
-  Future<void> uploadFile(File file) async {
-    return await _uploadRepository.uploadFile(file);
+  Future<void> uploadFile(File file, String language, String persona) async {
+    return await _uploadRepository.uploadFile(file, language, persona);
   }
 }

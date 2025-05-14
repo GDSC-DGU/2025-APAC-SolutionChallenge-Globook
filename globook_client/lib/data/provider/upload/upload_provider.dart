@@ -5,5 +5,6 @@ import 'package:globook_client/domain/model/file.dart';
 
 abstract class UploadProvider {
   Future<ResponseWrapper<List<UserFile>>> getUserFiles();
-  Future<ResponseWrapper<void>> uploadFile(File file);
+  Future<ResponseWrapper<void>> uploadFile(
+      File file, String language, String persona);
 }
