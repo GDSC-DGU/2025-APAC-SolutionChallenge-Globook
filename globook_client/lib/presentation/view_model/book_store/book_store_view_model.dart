@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:globook_client/domain/enum/EbookCategory.dart';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/usecase/book_store/book_store_usecase.dart';
 
@@ -15,8 +16,8 @@ class BookStoreViewModel extends GetxController {
   /* ----------------- Private Fields --------------------- */
   /* ------------------------------------------------------ */
   final RxList<Book> _todayBooks = RxList<Book>([]);
-  final RxList<Book> _nonFictionBooks = RxList<Book>([]);
-  final RxList<Book> _philosophyBooks = RxList<Book>([]);
+  final RxMap<EbookCategory, List<Book>> _categorizedBooks =
+      <EbookCategory, List<Book>>{}.obs;
   final RxString _searchQuery = ''.obs;
   final RxBool _isLoading = false.obs;
 
@@ -25,10 +26,8 @@ class BookStoreViewModel extends GetxController {
   /* ------------------------------------------------------ */
   // ignore: invalid_use_of_protected_member
   List<Book> get todayBooks => _todayBooks.value;
-  // ignore: invalid_use_of_protected_member
-  List<Book> get nonFictionBooks => _nonFictionBooks.value;
-  // ignore: invalid_use_of_protected_member
-  List<Book> get philosophyBooks => _philosophyBooks.value;
+  List<Book> getBooksByCategory(EbookCategory category) =>
+      _categorizedBooks[category] ?? [];
   String get searchQuery => _searchQuery.value;
   bool get isLoading => _isLoading.value;
 
@@ -46,8 +45,7 @@ class BookStoreViewModel extends GetxController {
     _isLoading.value = true;
     try {
       await _loadTodayBooks();
-      await _loadNonFictionBooks();
-      await _loadPhilosophyBooks();
+      await _loadAllCategoryBooks();
     } catch (e) {
       print('Error loading books: $e');
     } finally {
@@ -56,15 +54,21 @@ class BookStoreViewModel extends GetxController {
   }
 
   Future<void> _loadTodayBooks() async {
-    _todayBooks.addAll(await _bookStoreUseCase.getTodayBooks());
+    final response = await _bookStoreUseCase.getTodayBooks('COMPUTER');
+    _todayBooks.value = response;
   }
 
-  Future<void> _loadNonFictionBooks() async {
-    _nonFictionBooks.addAll(await _bookStoreUseCase.getNonFictionBooks());
-  }
+  Future<void> _loadAllCategoryBooks() async {
+    final response = await _bookStoreUseCase.getAllCategoryBooks();
+    _categorizedBooks.clear();
 
-  Future<void> _loadPhilosophyBooks() async {
-    _philosophyBooks.addAll(await _bookStoreUseCase.getPhilosophyBooks());
+    response.forEach((category, books) {
+      final ebookCategory = EbookCategory.values.firstWhere(
+        (e) => e.toString().split('.').last == category,
+        orElse: () => EbookCategory.SCIENCE,
+      );
+      _categorizedBooks[ebookCategory] = books;
+    });
   }
 
   /* ------------------------------------------------------ */
@@ -77,8 +81,7 @@ class BookStoreViewModel extends GetxController {
 
   Future<void> refreshBooks() async {
     _todayBooks.clear();
-    _nonFictionBooks.clear();
-    _philosophyBooks.clear();
+    _categorizedBooks.clear();
     await _loadInitialData();
   }
 }

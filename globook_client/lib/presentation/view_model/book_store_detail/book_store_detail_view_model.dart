@@ -1,6 +1,11 @@
+import 'dart:async';
 import 'package:get/get.dart';
+import 'package:globook_client/app/config/app_routes.dart';
+import 'package:globook_client/app/utility/log_util.dart';
+import 'package:globook_client/domain/enum/EbookDownloadStatus.dart';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/usecase/book_store_detail/book_store_detail_usecase.dart';
+import 'package:globook_client/presentation/view_model/favorite/favorite_view_model.dart';
 
 class BookStoreDetailViewModel extends GetxController {
   /* ------------------------------------------------------ */
@@ -18,33 +23,58 @@ class BookStoreDetailViewModel extends GetxController {
   /* ------------------------------------------------------ */
   final Rx<Book?> _currentBook = Rx<Book?>(null);
   final RxBool _isLoading = false.obs;
-  final RxBool _isBookmarked = false.obs;
+  final Rx<EbookDownloadStatus?> _downloadStatus =
+      Rx<EbookDownloadStatus?>(null);
+  final RxBool _isFavorite = false.obs;
   final RxList<Book> _categoryBooks = <Book>[].obs;
+  Timer? _statusCheckTimer;
 
   /* ------------------------------------------------------ */
   /* ----------------- Public Fields ---------------------- */
   /* ------------------------------------------------------ */
   Book? get currentBook => _currentBook.value;
   bool get isLoading => _isLoading.value;
-  bool get isBookmarked => _isBookmarked.value;
+  EbookDownloadStatus? get downloadStatus => _downloadStatus.value;
+  bool get isFavorite => _isFavorite.value;
   List<Book> get categoryBooks => _categoryBooks;
 
   @override
   void onInit() {
     super.onInit();
-    _loadBookDetail(Get.parameters['bookId'] ?? '');
+    final arguments = Get.arguments;
+    if (arguments is int) {
+      _loadBookDetail(arguments);
+    }
+  }
+
+  @override
+  void onClose() {
+    _statusCheckTimer?.cancel();
+    super.onClose();
   }
 
   /* ------------------------------------------------------ */
   /* ----------------- Private Methods -------------------- */
   /* ------------------------------------------------------ */
-  Future<void> _loadBookDetail(String bookId) async {
+  Future<void> _loadBookDetail(int bookId) async {
+    if (bookId <= 0) {
+      print('Invalid book ID: $bookId');
+      return;
+    }
+
+    // 이전 상태 초기화
+    _currentBook.value = null;
+    _downloadStatus.value = null;
+    _isFavorite.value = false;
+    _categoryBooks.clear();
+    _statusCheckTimer?.cancel();
+
     _isLoading.value = true;
     try {
-      _currentBook.value =
-          await _bookStoreDetailUseCase.getBookStoreDetail(bookId);
+      final book = await _bookStoreDetailUseCase.getBookStoreDetail(bookId);
+      _currentBook.value = book;
+      await _checkStatus();
       await _loadCategoryBooks();
-      await _checkBookmarkStatus();
     } catch (e) {
       print('Error loading book detail: $e');
     } finally {
@@ -53,37 +83,92 @@ class BookStoreDetailViewModel extends GetxController {
   }
 
   Future<void> _loadCategoryBooks() async {
-    try {
-      _categoryBooks.value = await _bookStoreDetailUseCase.getCategoryBooks();
-    } catch (e) {
-      print('Error loading category books: $e');
+    final otherBookList = currentBook?.otherBookList;
+    if (otherBookList != null) {
+      _categoryBooks.value = otherBookList;
     }
   }
 
-  Future<void> _checkBookmarkStatus() async {
-    _isBookmarked.value = false;
+  Future<void> _checkStatus() async {
+    _isFavorite.value = currentBook?.isFavorite ?? false;
+
+    // 서버에서 받아온 상태 확인
+    final status = currentBook?.downloadStatus;
+    if (status == null) {
+      _downloadStatus.value = EbookDownloadStatus.download;
+    } else {
+      _downloadStatus.value = status;
+    }
+
+    // 다운로드 중이면 타이머 시작
+    if (_downloadStatus.value == EbookDownloadStatus.downloading) {
+      _startStatusCheckTimer();
+    } else {
+      _statusCheckTimer?.cancel();
+    }
+
+    LogUtil.debug(
+        'BookStoreDetailViewModel: _checkStatus - status: ${_downloadStatus.value}');
+  }
+
+  void _startStatusCheckTimer() {
+    _statusCheckTimer?.cancel();
+    _statusCheckTimer =
+        Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (_currentBook.value != null) {
+        await _loadBookDetail(_currentBook.value!.id);
+      }
+    });
   }
 
   /* ------------------------------------------------------ */
   /* ----------------- Public Methods --------------------- */
   /* ------------------------------------------------------ */
-  Future<void> loadBookDetail(String bookId) async {
+  Future<void> loadBookDetail(int bookId) async {
     await _loadBookDetail(bookId);
   }
 
-  Future<void> toggleBookmark() async {
-    await _bookStoreDetailUseCase.addFavoriteBook(currentBook!.id);
+  Future<void> toggleFavorite(bool isFavorite) async {
+    final favoriteViewModel = Get.find<FavoriteViewModel>();
+
+    if (isFavorite) {
+      final isSuccess =
+          await _bookStoreDetailUseCase.removeFavoriteBook(currentBook!.id);
+      if (isSuccess) {
+        _isFavorite.value = !_isFavorite.value;
+      }
+    } else {
+      final isSuccess =
+          await _bookStoreDetailUseCase.addFavoriteBook(currentBook!.id);
+      if (isSuccess) {
+        _isFavorite.value = !_isFavorite.value;
+      }
+    }
+    favoriteViewModel.loadFiles();
   }
 
-  Future<void> downloadBook() async {
-    await _bookStoreDetailUseCase.downloadBook(currentBook!.id);
+  Future<void> downloadBook(int bookId, String language, String persona) async {
+    try {
+      final isSuccess =
+          await _bookStoreDetailUseCase.downloadBook(bookId, language, persona);
+      if (isSuccess) {
+        _downloadStatus.value = EbookDownloadStatus.downloading;
+        _startStatusCheckTimer();
+      }
+    } catch (e) {
+      print('Error downloading book: $e');
+    }
   }
 
   void onCategoryBookPressed(Book book) {
-    Get.toNamed('/book_store_detail', arguments: book.id);
+    LogUtil.info('onCategoryBookPressed: ${book.id}');
+    _loadBookDetail(book.id);
   }
 
   void onViewAllCategoryBooks() {
-    Get.toNamed('/book_store_detail', arguments: _currentBook.value?.category);
+    if (_currentBook.value?.category != null) {
+      Get.toNamed(AppRoutes.GENRE_BOOKS,
+          arguments: _currentBook.value!.category.toString().split('.').last);
+    }
   }
 }
