@@ -1,51 +1,39 @@
 import 'package:globook_client/domain/enum/Efile.dart';
 
 class UserFile {
-  final String id;
-  final String name;
-  final String previewUrl;
-  final String fileUrl;
-  final FileType fileType;
-  final DateTime uploadedAt;
-  final FileStatus status;
+  final int id;
+  final String title;
+  final String language;
+  final FileStatus fileStatus;
+  final DateTime createdAt;
 
-  const UserFile({
+  UserFile({
     required this.id,
-    required this.name,
-    required this.previewUrl,
-    required this.fileUrl,
-    required this.fileType,
-    required this.uploadedAt,
-    required this.status,
+    required this.title,
+    required this.language,
+    required this.fileStatus,
+    required this.createdAt,
   });
 
   factory UserFile.fromJson(Map<String, dynamic> json) {
     return UserFile(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      previewUrl: json['previewUrl'] as String,
-      fileUrl: json['fileUrl'] as String,
-      fileType: FileType.values.firstWhere(
-        (e) => e.toString() == 'FileType.${json['fileType']}',
-        orElse: () => FileType.other,
-      ),
-      uploadedAt: DateTime.parse(json['uploadedAt'] as String),
-      status: FileStatus.values.firstWhere(
-        (e) => e.toString() == 'FileStatus.${json['status']}',
+      id: json['id'] as int,
+      title: json['title'] as String,      language: json['language'] as String,
+      fileStatus: FileStatus.values.firstWhere(
+        (e) => e.toString().split('.').last.toUpperCase() == json['fileStatus'],
         orElse: () => FileStatus.uploading,
       ),
+      createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'previewUrl': previewUrl,
-      'fileUrl': fileUrl,
-      'fileType': fileType.toString().split('.').last,
-      'uploadedAt': uploadedAt.toIso8601String(),
-      'status': status.toString().split('.').last,
+      'title': title,
+      'language': language,
+      'fileStatus': fileStatus.toString().split('.').last,
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 }
