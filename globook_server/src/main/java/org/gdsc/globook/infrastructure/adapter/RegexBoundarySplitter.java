@@ -56,6 +56,6 @@ public class RegexBoundarySplitter implements MarkdownSplitterPort {
 
     // 주어진 시작 위치 기준으로 TOKEN_BUDGET 에 해당하는 문자 수만큼의 종료 위치를 근사 계산
     private int approxIdx(String md, int off) {
-        return Math.min(md.length(), (int) (off + TOKEN_BUDGET * 4.2));
+        return Math.min(md.length(), (int) (off + TOKEN_BUDGET * 2.8));
     }
 }
