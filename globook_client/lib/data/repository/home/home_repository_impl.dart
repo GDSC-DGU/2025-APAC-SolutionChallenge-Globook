@@ -2,7 +2,8 @@ import 'package:get/get.dart';
 import 'package:globook_client/data/provider/home/home_provider.dart';
 import 'package:globook_client/data/repository/home/home_repository.dart';
 import 'package:globook_client/domain/model/book.dart';
-import 'package:globook_client/app/utility/log_util.dart';
+import 'package:globook_client/domain/model/reader.dart';
+import 'package:globook_client/presentation/view_model/reader/reader_shared_preference.dart';
 
 class HomeRepositoryImpl extends GetxService implements HomeRepository {
   late final HomeProvider _homeProvider;
@@ -14,9 +15,21 @@ class HomeRepositoryImpl extends GetxService implements HomeRepository {
   }
 
   @override
-  Future<Book> getLastReadBook() async {
-    final response = await _homeProvider.getLastReadBook();
-    return response.data!;
+  Future<ParagraphsInfo> getLastParagraphsInfo() async {
+    final paragraphsInfo =
+        await ReaderSharedPreference().loadLastParagraphsInfo();
+
+    return paragraphsInfo ??
+        ParagraphsInfo(
+          id: -1,
+          title: '읽은 책이 없네요!',
+          
+          targetLanguage: 'EN',
+          persona: 'ETHAN',
+          maxIndex: 100,
+          currentIndex: 0,
+          imageUrl: 'https://storage.googleapis.com/globook-bucket/globook.png',
+        );
   }
 
   @override

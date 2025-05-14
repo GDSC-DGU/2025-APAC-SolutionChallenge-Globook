@@ -63,9 +63,9 @@ class LanguageSelectionModal extends BaseWidget<HomeViewModel> {
                   Expanded(
                     child: _buildLanguageList(
                       title: 'Source Language',
-                      selectedLanguage: viewModel.selectedSourceLanguage,
+                      selectedLanguage: initialSourceLanguage,
                       onLanguageSelected: (language) {
-                        viewModel.updateSourceLanguage(language);
+                        print(language);
                       },
                     ),
                   ),
@@ -76,9 +76,9 @@ class LanguageSelectionModal extends BaseWidget<HomeViewModel> {
                   Expanded(
                     child: _buildLanguageList(
                       title: 'Translation Language',
-                      selectedLanguage: viewModel.selectedTargetLanguage,
+                      selectedLanguage: initialTargetLanguage,
                       onLanguageSelected: (language) {
-                        viewModel.updateTargetLanguage(language);
+                        print(language);
                       },
                     ),
                   ),
@@ -89,10 +89,6 @@ class LanguageSelectionModal extends BaseWidget<HomeViewModel> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 onPressed: () {
-                  viewModel
-                      .updateSourceLanguage(viewModel.selectedSourceLanguage);
-                  viewModel
-                      .updateTargetLanguage(viewModel.selectedTargetLanguage);
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -104,10 +100,6 @@ class LanguageSelectionModal extends BaseWidget<HomeViewModel> {
                 ),
                 child: StyledButton(
                   onPressed: () {
-                    viewModel
-                        .updateSourceLanguage(viewModel.selectedSourceLanguage);
-                    viewModel
-                        .updateTargetLanguage(viewModel.selectedTargetLanguage);
                     Navigator.pop(context);
                   },
                   text: "Save",
