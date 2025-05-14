@@ -55,6 +55,14 @@ abstract class BaseScreen<T extends GetxController> extends GetView<T> {
     viewModel.initialized;
   }
 
+  /// Method to initialize the screen
+  @protected
+  void onInit() {}
+
+  /// Method to clean up when the screen is closed
+  @protected
+  void onClose() {}
+
   /// Method to get the view model
   @protected
   T get viewModel => controller;
