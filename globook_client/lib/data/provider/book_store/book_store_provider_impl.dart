@@ -1,3 +1,4 @@
+import 'package:globook_client/app/utility/log_util.dart';
 import 'package:globook_client/core/provider/base_connect.dart';
 import 'package:globook_client/data/model/repsonse_wrapper.dart';
 import 'package:globook_client/data/provider/book_store/book_store_provider.dart';
@@ -5,76 +6,55 @@ import 'package:globook_client/domain/model/book.dart';
 
 class BookStoreProviderImpl extends BaseConnect implements BookStoreProvider {
   @override
-  Future<ResponseWrapper<List<Book>>> getTodayBooks() async {
-    return ResponseWrapper(success: true, data: [
-      const Book(
-        id: '1',
-        title: 'Beneath the Wheel',
-        author: '헤르만 헤세',
-        imageUrl: 'assets/books/beneath_the_wheel.jpg',
-        description: '헤르만 헤세의 대표작',
-        category: 'fiction',
-      ),
-      const Book(
-        id: '2',
-        title: 'Crime and Punishment',
-        author: '표도르 도스토예프스키',
-        imageUrl: 'assets/books/crime_and_punishment.jpg',
-        description: '도스토예프스키의 대표작',
-        category: 'fiction',
-      ),
-      const Book(
-        id: '3',
-        title: 'Foster',
-        author: 'Claire Keegan',
-        imageUrl: 'assets/books/foster.jpg',
-        description: 'A thing of finely honed beauty',
-        category: 'fiction',
-      ),
-    ]);
+  Future<ResponseWrapper<List<Book>>> getTodayBooks(String category) async {
+    try {
+      final response = await get('/api/v1/books/today?category=$category',
+          headers: BaseConnect.usedAuthorization);
+      LogUtil.info(response.body);
+
+      if (response.statusCode == 200 && response.body['success'] == true) {
+        final List<dynamic> books = response.body['data']['randomBooks'];
+        final List<Book> todayBooks =
+            books.map((book) => Book.fromJson(book)).toList();
+
+        return ResponseWrapper(success: true, data: todayBooks);
+      } else {
+        final errorMessage = response.body['message'] ?? '도서 목록을 불러오는데 실패했습니다.';
+        handleError(errorMessage);
+        return ResponseWrapper(success: false, data: [], message: errorMessage);
+      }
+    } catch (e) {
+      handleError('서버 연결에 실패했습니다. ${e.toString()}');
+      return ResponseWrapper(success: false, data: [], message: e.toString());
+    }
   }
 
   @override
-  Future<ResponseWrapper<List<Book>>> getNonFictionBooks() async {
-    return ResponseWrapper(success: true, data: [
-      const Book(
-        id: '4',
-        title: '1984',
-        author: 'George Orwell',
-        imageUrl: 'assets/books/1984.jpg',
-        description: '조지 오웰의 디스토피아 소설',
-        category: 'non-fiction',
-      ),
-      const Book(
-        id: '5',
-        title: 'Brave New World',
-        author: 'Aldous Huxley',
-        imageUrl: 'assets/books/brave_new_world.jpg',
-        description: '올더스 헉슬리의 대표작',
-        category: 'non-fiction',
-      ),
-    ]);
-  }
+  Future<ResponseWrapper<Map<String, List<Book>>>> getAllCategoryBooks() async {
+    try {
+      final response =
+          await get('/api/v1/books', headers: BaseConnect.usedAuthorization);
+      LogUtil.info(response.body);
+      if (response.statusCode == 200 && response.body['success'] == true) {
+        final Map<String, dynamic> booksByCategory =
+            response.body['data']['booksByCategory'];
+        Map<String, List<Book>> categorizedBooks = {};
 
-  @override
-  Future<ResponseWrapper<List<Book>>> getPhilosophyBooks() async {
-    return ResponseWrapper(success: true, data: [
-      const Book(
-        id: '6',
-        title: 'The Boy in the Striped Pyjamas',
-        author: 'John Boyne',
-        imageUrl: 'assets/books/the_boy.jpg',
-        description: '존 보인의 대표작',
-        category: 'philosophy',
-      ),
-      const Book(
-        id: '7',
-        title: 'Foster',
-        author: 'Claire Keegan',
-        imageUrl: 'assets/books/foster.jpg',
-        description: 'A small miracle',
-        category: 'philosophy',
-      ),
-    ]);
+        booksByCategory.forEach((category, books) {
+          final List<dynamic> bookList = books as List<dynamic>;
+          categorizedBooks[category] =
+              bookList.map((book) => Book.fromJson(book)).toList();
+        });
+
+        return ResponseWrapper(success: true, data: categorizedBooks);
+      } else {
+        final errorMessage = response.body['message'] ?? '도서 목록을 불러오는데 실패했습니다.';
+        handleError(errorMessage);
+        return ResponseWrapper(success: false, data: {}, message: errorMessage);
+      }
+    } catch (e) {
+      handleError('서버 연결에 실패했습니다. ${e.toString()}');
+      return ResponseWrapper(success: false, data: {}, message: e.toString());
+    }
   }
 }
