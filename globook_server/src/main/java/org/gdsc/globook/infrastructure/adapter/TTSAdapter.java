@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.gdsc.globook.application.dto.TTSRequestDto;
 import org.gdsc.globook.application.dto.TTSResponseDto;
-import org.gdsc.globook.application.dto.UploadPdfRequestDto;
 import org.gdsc.globook.application.dto.gemini.GeminiResponseDto;
 import org.gdsc.globook.application.dto.gemini.GeneralizeParagraphRequestDto;
 import org.gdsc.globook.application.port.TTSPort;
@@ -14,8 +13,7 @@ import org.gdsc.globook.core.util.RetryUtils;
 import org.gdsc.globook.domain.type.ELanguage;
 import org.gdsc.globook.domain.type.EPersona;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
@@ -53,18 +51,14 @@ public class TTSAdapter implements TTSPort {
                 EPersona.valueOf(persona)
         );
 
-        TTSResponseDto ttsResponse = RetryUtils.retry(() -> {
-            ResponseEntity<TTSResponseDto> response = ttsRestClient.post()
-                    .body(ttsRequestDto)
-                    .retrieve()
-                    .toEntity(TTSResponseDto.class);
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                return response.getBody();
-            } else {
-                throw new IllegalStateException("TTS API 호출 실패: " + response.getStatusCode() + " 실패 시 사용된 메시지 : " + ttsRequestDto.input());
-            }
-        }, 5, 1000, true);
+        TTSResponseDto ttsResponse = RetryUtils.retry(() ->
+                        ttsRestClient.post()
+                                .body(ttsRequestDto)
+                                .retrieve()
+                                .onStatus(HttpStatusCode::isError,
+                                        (req, res) -> new IllegalStateException("TTS 호출 실패: " + res.getStatusCode() + " 입력: " + ttsRequestDto.input()))
+                                .body(TTSResponseDto.class),
+                5, 1000, true);
 
         return uploadAudio(
                 userId,

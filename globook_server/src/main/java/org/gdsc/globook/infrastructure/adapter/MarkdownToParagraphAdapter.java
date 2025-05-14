@@ -40,7 +40,7 @@ public class MarkdownToParagraphAdapter implements MarkdownToParagraphPort {
                     new TypeReference<List<String>>() {}
             );
         } catch (IOException e) {
-            throw new RuntimeException("Gemini 응답 파싱 중 오류 발생", e);
+            throw new RuntimeException("Gemini 응답 파싱 중 오류 발생 ----------- " + response.candidates().getFirst().content().parts().getFirst().text());
         }
     }
 }

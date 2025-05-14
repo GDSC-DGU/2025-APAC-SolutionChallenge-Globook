@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 public class RegexBoundarySplitter implements MarkdownSplitterPort {
-    private static final int TOKEN_BUDGET = 6000;
+    private static final int TOKEN_BUDGET = 3000;
     // 분할 지점에 대한 정규표현식
     private static final Pattern SAFE = Pattern.compile(
             "(?m)^\\s*$|^#{1,6}\\s|^[-*+]\\s|^```"

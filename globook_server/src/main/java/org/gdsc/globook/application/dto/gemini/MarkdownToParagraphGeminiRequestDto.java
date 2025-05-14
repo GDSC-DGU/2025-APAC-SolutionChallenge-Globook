@@ -11,7 +11,7 @@ public record MarkdownToParagraphGeminiRequestDto(
         GenerationConfig generationConfig
 ) {
     private static final Part prompt1
-            = new Part("당신은 마크다운을 문자열 배열로 잘라 반환하는 챗봇입니다. 다른 사족 없이 잘라진 배열로만 반환합니다.");
+            = new Part("You are a chatbot that returns a markdown to a string array. Returns it only to a truncated array without any other family tree.");
     private static final Part prompt2
             = new Part("""
             The input is a single pure Markdown string.
