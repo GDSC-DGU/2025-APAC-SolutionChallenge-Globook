@@ -14,32 +14,27 @@ class BookStoreDetailRepositoryImpl extends GetxService
   }
 
   @override
-  Future<Book> getBookStoreDetail(String bookId) async {
+  Future<Book> getBookStoreDetail(int bookId) async {
     final response = await _bookStoreDetailProvider.getBookStoreDetail(bookId);
     return response.data!;
   }
 
   @override
-  Future<void> addFavoriteBook(String bookId) async {
+  Future<bool> addFavoriteBook(int bookId) async {
     final response = await _bookStoreDetailProvider.addFavoriteBook(bookId);
-    return response.data;
-  }
-
-  @override
-  Future<void> removeFavoriteBook(String bookId) async {
-    final response = await _bookStoreDetailProvider.removeFavoriteBook(bookId);
-    return response.data;
-  }
-
-  @override
-  Future<List<Book>> getCategoryBooks() async {
-    final response = await _bookStoreDetailProvider.getCategoryBooks();
     return response.data!;
   }
 
   @override
-  Future<void> downloadBook(String bookId) async {
-    final response = await _bookStoreDetailProvider.downloadBook(bookId);
-    return response.data;
+  Future<bool> removeFavoriteBook(int bookId) async {
+    final response = await _bookStoreDetailProvider.removeFavoriteBook(bookId);
+    return response.data!;
+  }
+
+  @override
+  Future<bool> downloadBook(int bookId, String language, String persona) async {
+    final response = await _bookStoreDetailProvider.downloadBook(
+        bookId, language, persona);
+    return response.data!;
   }
 }

@@ -60,6 +60,10 @@ class StorageViewModel extends GetxController {
     Get.toNamed('/book-store-detail/${book.id}');
   }
 
+  void readFile(int fileId, int index, String type) {
+    Get.toNamed('/reader/${fileId}/${index}/$type');
+  }
+
   void viewAllFiles() {
     // TODO: 전체 파일 목록 보기 구현
   }

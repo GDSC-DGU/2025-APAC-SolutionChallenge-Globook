@@ -14,27 +14,22 @@ class BookStoreDetailUseCase extends BaseUseCase
   }
 
   @override
-  Future<void> addFavoriteBook(String bookId) {
+  Future<bool> addFavoriteBook(int bookId) {
     return _bookStoreDetailRepository.addFavoriteBook(bookId);
   }
 
   @override
-  Future<Book> getBookStoreDetail(String bookId) {
+  Future<Book> getBookStoreDetail(int bookId) {
     return _bookStoreDetailRepository.getBookStoreDetail(bookId);
   }
 
   @override
-  Future<List<Book>> getCategoryBooks() {
-    return _bookStoreDetailRepository.getCategoryBooks();
-  }
-
-  @override
-  Future<void> removeFavoriteBook(String bookId) {
+  Future<bool> removeFavoriteBook(int bookId) {
     return _bookStoreDetailRepository.removeFavoriteBook(bookId);
   }
 
   @override
-  Future<void> downloadBook(String bookId) {
-    return _bookStoreDetailRepository.downloadBook(bookId);
+  Future<bool> downloadBook(int bookId, String language, String persona) {
+    return _bookStoreDetailRepository.downloadBook(bookId, language, persona);
   }
 }

@@ -11,6 +11,8 @@ import 'package:globook_client/presentation/view/reader/reader_screen.dart';
 import 'package:globook_client/presentation/view/register/register_screen.dart';
 import 'package:globook_client/presentation/view/root/root_screen.dart';
 import 'package:globook_client/presentation/view/splash/splash_screen.dart';
+import 'package:globook_client/presentation/view/storage/storage_screen.dart';
+import 'package:globook_client/presentation/view/upload/upload_screen.dart';
 import 'package:globook_client/presentation/view_model/book_store_detail/book_store_detail_binding.dart';
 import 'package:globook_client/presentation/view_model/favorite/favorite_binding.dart';
 import 'package:globook_client/presentation/view_model/genre_books/genre_books_binding.dart';
@@ -43,6 +45,14 @@ abstract class AppPages {
     GetPage(
       name: AppRoutes.BOOK_STORE,
       page: () => const BookStoreScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.STORAGE,
+      page: () => const StorageScreen(),
+    ),
+    GetPage(
+      name: AppRoutes.UPLOAD,
+      page: () => const UploadScreen(),
     ),
     //-----------Below Pages Need Binding------------//
     GetPage(

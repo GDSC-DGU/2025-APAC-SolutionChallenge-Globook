@@ -17,7 +17,7 @@ class FileExtensionIcon extends StatelessWidget {
       width: 60,
       child: Center(
         child: SvgPicture.asset(
-          file.fileType == FileType.pdf
+          file.title.contains('.pdf')
               ? 'assets/icons/svg/pdf.svg'
               : 'assets/icons/svg/hwp.svg',
           width: 40,

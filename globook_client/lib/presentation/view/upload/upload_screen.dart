@@ -8,6 +8,7 @@ import 'package:globook_client/presentation/view/upload/widget/file_information.
 import 'package:globook_client/presentation/view/upload/widget/file_status_button.dart';
 import 'package:globook_client/presentation/view_model/upload/upload_view_model.dart';
 import 'package:globook_client/presentation/widget/search_field.dart';
+import 'package:globook_client/presentation/widget/book_read_setting_bottom_sheet.dart';
 
 class UploadScreen extends BaseScreen<UploadViewModel> {
   const UploadScreen({super.key});
@@ -42,15 +43,47 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
   }
 
   Widget _buildFileList() {
-    return Obx(() => Expanded(
-          child: ListView.builder(
-            itemCount: viewModel.uploadedFiles.length,
-            itemBuilder: (context, index) {
-              final file = viewModel.uploadedFiles[index];
-              return _buildFileItem(file);
-            },
+    return Obx(() {
+      if (viewModel.uploadedFile.isEmpty) {
+        return Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.insert_drive_file,
+                    size: 60, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'No uploaded files',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Click Upload button on the bottom to add a file',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ));
+        );
+      }
+      // 파일이 있을 때 기존 리스트
+      return Expanded(
+        child: ListView.builder(
+          itemCount: viewModel.uploadedFile.length,
+          itemBuilder: (context, index) {
+            final file = viewModel.uploadedFile[index];
+            return _buildFileItem(file);
+          },
+        ),
+      );
+    });
   }
 
   Widget _buildFileItem(UserFile file) {
@@ -86,7 +119,26 @@ class UploadScreen extends BaseScreen<UploadViewModel> {
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () {
-          viewModel.uploadFile();
+          showModalBottomSheet(
+            context: Get.context!,
+            isScrollControlled: true,
+            backgroundColor: Colors.white,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (context) => DraggableScrollableSheet(
+              expand: false,
+              maxChildSize: 0.7,
+              minChildSize: 0.3,
+              initialChildSize: 0.5,
+              builder: (context, scrollController) => SingleChildScrollView(
+                controller: scrollController,
+                child: const BookReadSettingBottomSheet(
+                  isFromUpload: true,
+                ),
+              ),
+            ),
+          );
         },
         icon: const Icon(Icons.upload_file, color: Colors.white),
         label: const Text(

@@ -5,14 +5,12 @@ class FeaturedBooksCarousel extends StatefulWidget {
   final String title;
   final List<Book> books;
   final Function(Book book) onBookPressed;
-  final VoidCallback onViewAllPressed;
 
   const FeaturedBooksCarousel({
     super.key,
     required this.title,
     required this.books,
     required this.onBookPressed,
-    required this.onViewAllPressed,
   });
 
   @override
@@ -141,7 +139,7 @@ class _FeaturedBooksCarouselState extends State<FeaturedBooksCarousel> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
         image: DecorationImage(
-          image: AssetImage(book.imageUrl),
+          image: NetworkImage(book.imageUrl),
           fit: BoxFit.cover,
         ),
         boxShadow: [

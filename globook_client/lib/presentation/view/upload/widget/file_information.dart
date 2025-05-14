@@ -18,7 +18,7 @@ class FileInformation extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            file.name,
+            file.title,
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -28,7 +28,7 @@ class FileInformation extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '업로드: ${_formatDate(file.uploadedAt)}',
+            '업로드: ${_formatDate(file.createdAt)}',
             style: const TextStyle(
               fontSize: 12,
               color: ColorSystem.lightText,

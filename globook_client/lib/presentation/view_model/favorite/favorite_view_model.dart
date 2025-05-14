@@ -56,12 +56,12 @@ class FavoriteViewModel extends GetxController {
     _favoriteBooks.value = filteredBooks;
   }
 
-  Future<void> removeFavoriteBook(String bookId) async {
+  Future<void> removeFavoriteBook(int bookId) async {
     await _favoriteUseCase.removeFavoriteBook(bookId);
     loadFiles();
   }
 
-  Future<void> readBook(String bookId) async {
+  Future<void> readBook(int bookId) async {
     await _favoriteUseCase.readBook(bookId);
     loadFiles();
   }

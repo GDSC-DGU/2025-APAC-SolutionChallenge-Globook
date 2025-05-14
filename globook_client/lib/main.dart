@@ -18,14 +18,11 @@ void main() async {
   // Initialize Environment
   await EnvironmentFactory.onInit();
 
-  // Storage Factory 초기화 추가
+  // Storage Factory Initialize
   await StorageFactory.onInit();
   await StorageFactory.onReady();
 
   // Dependency Injection
-  RootBinding().dependencies();
-  AppDependency().dependencies();
-
   runApp(const MyApp());
 }
 
@@ -41,6 +38,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       initialRoute: AppRoutes.SPLASH,
+      initialBinding: AppDependency(),
       getPages: AppPages.pages,
     );
   }

@@ -36,23 +36,23 @@ class RootScreen extends BaseScreen<RootViewModel> {
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.upload),
-              label: '업로드',
+              label: 'Upload',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.archive_outlined),
-              label: '보관함',
+              label: 'Storage',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              label: '홈',
+              label: 'Home',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.book),
-              label: '서점',
+              label: 'Book Store',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.favorite),
-              label: '즐겨찾기',
+              label: 'Favorite',
             ),
           ],
         ));

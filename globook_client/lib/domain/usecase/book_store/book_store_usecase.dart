@@ -13,17 +13,12 @@ class BookStoreUseCase extends BaseUseCase implements BookStoreRepository {
   }
 
   @override
-  Future<List<Book>> getTodayBooks() async {
-    return await _bookStoreRepository.getTodayBooks();
+  Future<List<Book>> getTodayBooks(String category) async {
+    return await _bookStoreRepository.getTodayBooks(category);
   }
 
   @override
-  Future<List<Book>> getNonFictionBooks() async {
-    return await _bookStoreRepository.getNonFictionBooks();
-  }
-
-  @override
-  Future<List<Book>> getPhilosophyBooks() async {
-    return await _bookStoreRepository.getPhilosophyBooks();
+  Future<Map<String, List<Book>>> getAllCategoryBooks() async {
+    return await _bookStoreRepository.getAllCategoryBooks();
   }
 }

@@ -1,74 +1,61 @@
-import 'package:get/get.dart';
+import 'package:globook_client/core/provider/base_connect.dart';
 import 'package:globook_client/data/model/repsonse_wrapper.dart';
 import 'package:globook_client/data/provider/storage/storage_provider.dart';
-import 'package:globook_client/domain/enum/Efile.dart';
+import 'package:globook_client/domain/enum/EbookCategory.dart';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/model/file.dart';
 
-class StorageProviderImpl extends GetxService implements StorageProvider {
+class StorageProviderImpl extends BaseConnect implements StorageProvider {
   @override
   Future<ResponseWrapper<List<UserFile>>> getUserFiles() async {
-    return ResponseWrapper(data: [
-      UserFile(
-        id: '1',
-        name: 'Policy.pdf',
-        previewUrl: 'https://example.com/preview1.jpg',
-        fileUrl: 'https://example.com/file1.pdf',
-        fileType: FileType.pdf,
-        uploadedAt: DateTime.now(),
-        status: FileStatus.uploading,
-      ),
-      UserFile(
-        id: '2',
-        name: 'Terms.pdf',
-        previewUrl: 'https://example.com/preview2.jpg',
-        fileUrl: 'https://example.com/file2.pdf',
-        fileType: FileType.pdf,
-        uploadedAt: DateTime.now(),
-        status: FileStatus.translating,
-      ),
-      UserFile(
-        id: '3',
-        name: 'Privacy.pdf',
-        previewUrl: 'https://example.com/preview3.jpg',
-        fileUrl: 'https://example.com/file3.pdf',
-        fileType: FileType.pdf,
-        uploadedAt: DateTime.now(),
-        status: FileStatus.completed,
-      ),
-    ], success: true);
+    final response = await get('/api/v1/users/files',
+        headers: BaseConnect.usedAuthorization);
+    if (response.statusCode == 200 && response.body['success'] == true) {
+      final data = response.body['data'];
+      if (data != null && data['files'] != null) {
+        final files = (data['files'] as List)
+            .map((e) => UserFile.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return ResponseWrapper(success: true, data: files);
+      } else {
+        return ResponseWrapper(success: true, data: []);
+      }
+    }
+    final errorMessage = response.body['message'] ?? 'Failed to load file list';
+    handleError(errorMessage);
+    return ResponseWrapper(success: false, data: [], message: errorMessage);
   }
 
   @override
   Future<ResponseWrapper<List<Book>>> getUserBooks() async {
-    return ResponseWrapper(data: [
-      const Book(
-        id: '1',
-        title: 'Beyond the Wind',
-        author: 'John Smith',
-        imageUrl: 'https://example.com/book1.jpg',
-        description: 'A story about adventure.',
-        category: 'fiction',
-        authorBooks: [],
-      ),
-      const Book(
-        id: '2',
-        title: 'Crime and Punishment',
-        author: 'Fyodor Dostoevsky',
-        imageUrl: 'https://example.com/book2.jpg',
-        description: 'A psychological thriller.',
-        category: 'fiction',
-        authorBooks: [],
-      ),
-      const Book(
-        id: '3',
-        title: 'Foster',
-        author: 'Claire Keegan',
-        imageUrl: 'https://example.com/book3.jpg',
-        description: 'A touching story.',
-        category: 'fiction',
-        authorBooks: [],
-      ),
-    ], success: true);
+    final response = await get('/api/v1/users/books',
+        headers: BaseConnect.usedAuthorization);
+    if (response.statusCode == 200 && response.body['success'] == true) {
+      final data = response.body['data'];
+      if (data != null && data['books'] != null) {
+        final books = (data['books'] as List)
+            .map((e) => Book.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return ResponseWrapper(success: true, data: books);
+      } else {
+        return ResponseWrapper(success: true, data: []);
+      }
+    }
+    final errorMessage = response.body['message'] ?? 'Failed to load book list';
+    handleError(errorMessage);
+    return ResponseWrapper(success: false, data: [], message: errorMessage);
+  }
+
+  @override
+  Future<ResponseWrapper<void>> readFile(int fileId, int index) async {
+    final response = await get(
+        '/api/v1/users/paragraphs?fileId=$fileId&index=$index',
+        headers: BaseConnect.usedAuthorization);
+    if (response.statusCode == 200 && response.body['success'] == true) {
+      return ResponseWrapper(success: true, data: null);
+    }
+    final errorMessage = response.body['message'] ?? 'Failed to read file';
+    handleError(errorMessage);
+    return ResponseWrapper(success: false, data: null, message: errorMessage);
   }
 }

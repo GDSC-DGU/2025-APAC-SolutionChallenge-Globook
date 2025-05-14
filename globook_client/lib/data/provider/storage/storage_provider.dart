@@ -5,4 +5,5 @@ import 'package:globook_client/domain/model/file.dart';
 abstract class StorageProvider {
   Future<ResponseWrapper<List<UserFile>>> getUserFiles();
   Future<ResponseWrapper<List<Book>>> getUserBooks();
+  Future<ResponseWrapper<void>> readFile(int fileId, int index);
 }
