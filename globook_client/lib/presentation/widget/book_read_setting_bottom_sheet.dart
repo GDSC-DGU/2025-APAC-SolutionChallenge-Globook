@@ -1,20 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:globook_client/app/config/color_system.dart';
+import 'package:globook_client/app/utility/log_util.dart';
 import 'package:globook_client/core/view/base_widget.dart';
 import 'package:globook_client/domain/enum/EttsGender.dart';
 import 'package:globook_client/domain/model/tts_character.dart';
-import 'package:globook_client/presentation/view_model/book_store/book_store_view_model.dart';
+import 'package:globook_client/domain/usecase/book_store_detail/book_store_detail_usecase.dart';
+import 'package:globook_client/presentation/view_model/book_store_detail/book_store_detail_view_model.dart';
+import 'package:get/get.dart';
+import 'package:globook_client/presentation/view_model/upload/upload_view_model.dart';
 
-class BookReadSettingBottomSheet extends BaseWidget<BookStoreViewModel> {
-  const BookReadSettingBottomSheet({super.key});
-
+class BookReadSettingBottomSheet extends BaseWidget<BookStoreDetailViewModel> {
+  const BookReadSettingBottomSheet(
+      {super.key, required this.isFromUpload, this.bookId});
+  final bool isFromUpload;
+  final int? bookId;
   @override
   Widget buildView(BuildContext context) {
-    return _BookReadSettingBottomSheetContent();
+    return _BookReadSettingBottomSheetContent(
+        isFromUpload: isFromUpload, bookId: bookId);
   }
 }
 
 class _BookReadSettingBottomSheetContent extends StatefulWidget {
+  const _BookReadSettingBottomSheetContent(
+      {required this.isFromUpload, this.bookId});
+  final bool isFromUpload;
+  final int? bookId;
   @override
   State<_BookReadSettingBottomSheetContent> createState() =>
       _BookReadSettingBottomSheetContentState();
@@ -22,56 +33,70 @@ class _BookReadSettingBottomSheetContent extends StatefulWidget {
 
 class _BookReadSettingBottomSheetContentState
     extends State<_BookReadSettingBottomSheetContent> {
+  final Map<String, String> languageMap = {
+    'English': 'EN',
+    '한국어': 'KO',
+    '日本語': 'JA',
+    '中文': 'ZH',
+    'Español': 'ES',
+    'Français': 'FR',
+    'Deutsch': 'DE',
+    'Italiano': 'IT',
+    'Português': 'PT',
+    'Русский': 'RU'
+  };
+
   final List<String> languages = [
     'English',
     '한국어',
     '日本語',
+    '中文',
     'Español',
     'Français',
     'Deutsch',
     'Italiano',
     'Português',
-    'Русский',
-    'Gaeilge'
+    'Русский'
   ];
+
   final List<TtsCharacter> characters = [
     TtsCharacter(
-        name: 'Ethan',
+        name: 'ETHAN',
         description: 'Calm • Novel, History Book',
         assetPath: 'assets/icons/png/ethan.png',
         gender: TtsGender.male,
         speed: 0.7,
         pitch: 0.7),
     TtsCharacter(
-        name: 'Luna',
+        name: 'LUNA',
         description: 'Bright and lively • Essay, Self-help Book',
         assetPath: 'assets/icons/png/luna.png',
         gender: TtsGender.female,
         speed: 1.3,
         pitch: 1.0),
     TtsCharacter(
-        name: 'Kai',
+        name: 'KAI',
         description: 'Lively • Web Novel, Fantasy',
         assetPath: 'assets/icons/png/kai.png',
         gender: TtsGender.male,
         speed: 1.3,
         pitch: 1.3),
     TtsCharacter(
-        name: 'Sora',
+        name: 'SORA',
         description: 'Warm and friendly • Children\'s Book',
         assetPath: 'assets/icons/png/sora.png',
         gender: TtsGender.female,
         speed: 1.0,
         pitch: 1.3),
     TtsCharacter(
-        name: 'Noah',
+        name: 'NOAH',
         description: 'Comfortable and stable • All Genres',
         assetPath: 'assets/icons/png/noah.png',
         gender: TtsGender.male,
         speed: 1.0,
         pitch: 1.0),
     TtsCharacter(
-        name: 'Aria',
+        name: 'ARIA',
         description: 'Deep and captivating • Mystery, Romance',
         assetPath: 'assets/icons/png/aria.png',
         gender: TtsGender.female,
@@ -159,6 +184,21 @@ class _BookReadSettingBottomSheetContentState
   }
 
   Widget _buildCharacterStep() {
+    if (!widget.isFromUpload) {
+      if (widget.bookId == null) {
+        return const Center(
+          child: Text('책 정보를 불러올 수 없습니다.'),
+        );
+      }
+      Get.put(BookStoreDetailUseCase());
+      final viewModel = BookStoreDetailViewModel();
+      viewModel.loadBookDetail(widget.bookId!);
+      Get.put(viewModel);
+    }
+    final uploadViewModel = Get.find<UploadViewModel>();
+    final bookStoreDetailViewModel =
+        widget.isFromUpload ? null : Get.find<BookStoreDetailViewModel>();
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -291,9 +331,37 @@ class _BookReadSettingBottomSheetContentState
         ),
         const SizedBox(height: 24),
         ElevatedButton.icon(
-          onPressed: selectedCharacterIdx != null
-              ? () => Navigator.pop(context)
-              : null,
+          onPressed:
+              (selectedLanguageIdx != null && selectedCharacterIdx != null)
+                  ? () async {
+                      final languageCode =
+                          languageMap[languages[selectedLanguageIdx!]];
+                      if (languageCode == null) {
+                        return;
+                      }
+
+                      if (widget.isFromUpload) {
+                        final file = await uploadViewModel.getFile();
+                        if (file != null) {
+                          await uploadViewModel.uploadFile(file, languageCode,
+                              characters[selectedCharacterIdx!].name);
+                          Get.back();
+                        }
+                        Navigator.pop(context);
+                      } else {
+                        if (widget.bookId == null) {
+                          LogUtil.error('bookId is null');
+                          return;
+                        } else {
+                          await bookStoreDetailViewModel?.downloadBook(
+                              widget.bookId!,
+                              languageCode,
+                              characters[selectedCharacterIdx!].name);
+                          Navigator.pop(context);
+                        }
+                      }
+                    }
+                  : null,
           icon: const Icon(Icons.check, color: Colors.white),
           label: const Text('Complete',
               style: TextStyle(fontSize: 16, color: Colors.white)),

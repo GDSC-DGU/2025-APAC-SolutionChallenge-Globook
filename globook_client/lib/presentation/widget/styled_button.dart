@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:globook_client/app/config/color_system.dart';
 
 class StyledButton extends StatelessWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final Widget? icon;
   final Color? backgroundColor;
@@ -38,7 +38,10 @@ class StyledButton extends StatelessWidget {
         onPressed: isDisabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
-          foregroundColor: Colors.white,
+          foregroundColor: textColor ?? Colors.white,
+          disabledBackgroundColor: backgroundColor?.withOpacity(0.5),
+          disabledForegroundColor:
+              textColor?.withOpacity(0.5) ?? Colors.white.withOpacity(0.5),
           padding: padding ??
               const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           minimumSize: Size.zero,
