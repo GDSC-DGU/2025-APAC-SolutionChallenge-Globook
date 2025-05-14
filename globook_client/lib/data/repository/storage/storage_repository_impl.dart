@@ -24,4 +24,10 @@ class StorageRepositoryImpl extends GetxService implements StorageRepository {
     final response = await _storageProvider.getUserBooks();
     return response.data ?? [];
   }
+
+  @override
+  Future<void> readFile(int fileId, int index) async {
+    final response = await _storageProvider.readFile(fileId, index);
+    return response.data;
+  }
 }

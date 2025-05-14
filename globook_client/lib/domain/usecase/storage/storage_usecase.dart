@@ -22,4 +22,9 @@ class StorageUsecase extends BaseUseCase implements StorageRepository {
   Future<List<Book>> getUserBooks() async {
     return await _storageRepository.getUserBooks();
   }
+
+  @override
+  Future<void> readFile(int fileId, int index) async {
+    return await _storageRepository.readFile(fileId, index);
+  }
 }
