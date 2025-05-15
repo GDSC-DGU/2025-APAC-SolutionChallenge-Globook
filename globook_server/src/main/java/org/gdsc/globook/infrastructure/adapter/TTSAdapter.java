@@ -60,12 +60,16 @@ public class TTSAdapter implements TTSPort {
                                 .body(TTSResponseDto.class),
                 5, 1000, true);
 
-        return uploadAudio(
-                userId,
-                fileId,
-                Base64.getDecoder().decode(ttsResponse.audioContent()),
-                "문단 번호" + paragraphId
-        );
+        if(ttsResponse.audioContent() == null) {
+            return "";
+        } else {
+            return uploadAudio(
+                    userId,
+                    fileId,
+                    Base64.getDecoder().decode(ttsResponse.audioContent()),
+                    "문단 번호" + paragraphId
+            );
+        }
     }
 
     private String uploadAudio(

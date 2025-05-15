@@ -62,7 +62,7 @@ public class PdfToMarkdownAdapter implements PdfToMarkdownPort {
             PdfToMarkdownResponseDto response = null;
 
             int maxTry = 30;
-            int intervalMs = 300;
+            int intervalMs = 500;
 
             for (int i = 0; i < maxTry; i++) {
                 log.info("polling ---------- " + i);
