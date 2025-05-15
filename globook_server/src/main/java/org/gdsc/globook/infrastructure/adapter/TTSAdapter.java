@@ -61,7 +61,7 @@ public class TTSAdapter implements TTSPort {
                 5, 1000, true);
 
         if(ttsResponse.audioContent() == null) {
-            log.info(ttsResponse.toString());
+            log.info(ttsResponse.toString() + "입력 텍스트는 다음과 같아요 ------- " + inputText);
             return "";
         } else {
             return uploadAudio(
