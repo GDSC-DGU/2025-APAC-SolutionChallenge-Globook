@@ -61,6 +61,7 @@ public class TTSAdapter implements TTSPort {
                 5, 1000, true);
 
         if(ttsResponse.audioContent() == null) {
+            log.info(ttsResponse.toString());
             return "";
         } else {
             return uploadAudio(

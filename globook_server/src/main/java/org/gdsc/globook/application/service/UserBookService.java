@@ -200,6 +200,7 @@ public class UserBookService {
             // 작업이 정상적으로 완료되었다면 userBook status 다시 변경
             userBook.updateStatus(EUserBookStatus.DOWNLOAD);
 
+            log.info(e.getMessage());
             throw new RuntimeException("정상 다운로드 실패");
         }
     }
