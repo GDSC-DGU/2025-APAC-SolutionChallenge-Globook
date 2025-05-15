@@ -16,8 +16,10 @@ class ReaderContent extends BaseWidget<ReaderViewModel> {
     bool isPaginationInProgress = false;
 
     void scrollToHighlight(int index) {
-      if (viewModel.isLoadingMore || isPaginationInProgress)
-        return; // If loading or pagination is in progress, do not scroll
+      if (viewModel.isLoadingMore || isPaginationInProgress) return;
+
+      // if the scroll position is at the top, do not scroll
+      if (scrollController.position.pixels == 0) return;
 
       // Find the actual DB index corresponding to the highlight
       final highlightIndex =
@@ -30,8 +32,7 @@ class ReaderContent extends BaseWidget<ReaderViewModel> {
           currentKey!.currentContext!,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
-          alignment:
-              0.5, // Center the highlight on the screen (0.0: top, 1.0: bottom)
+          alignment: 0.5,
         );
       }
     }

@@ -7,6 +7,7 @@ import 'package:globook_client/presentation/view/home/widget/current_paragrapth.
 import 'package:globook_client/presentation/widget/category_books.dart';
 
 import 'package:globook_client/presentation/view_model/home/home_view_model.dart';
+import 'package:globook_client/presentation/view_model/root/root_view_model.dart';
 import 'package:globook_client/presentation/widget/styled_button.dart';
 import 'package:get/get.dart';
 
@@ -37,7 +38,7 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
                         title: 'Another Books in Your Library',
                         books: viewModel.anotherBooks,
                         onViewAllPressed: () {
-                          Get.toNamed(AppRoutes.BOOK_STORE);
+                          Get.find<RootViewModel>().changeIndex(1);
                         },
                         onBookPressed: (book) {
                           Get.toNamed(AppRoutes.BOOK_STORE_DETAIL,
@@ -63,7 +64,7 @@ class HomeScreen extends BaseScreen<HomeViewModel> {
           ),
           SizedBox(height: 16),
           Text(
-            '로딩 중...',
+            'Loading...',
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,

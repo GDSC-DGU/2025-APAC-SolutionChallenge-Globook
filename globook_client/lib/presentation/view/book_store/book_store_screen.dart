@@ -12,23 +12,24 @@ class BookStoreScreen extends BaseScreen<BookStoreViewModel> {
   const BookStoreScreen({super.key});
 
   @override
+  PreferredSizeWidget? buildAppBar(BuildContext context) {
+    return AppBar(
+      title: const Text('Book Store'),
+      centerTitle: true,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+    );
+  }
+
+  @override
   Widget buildBody(BuildContext context) {
     return Obx(
       () => SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 60.0),
+          padding: const EdgeInsets.symmetric(vertical: 20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: SearchField(
-                  hintText: 'Search for your book',
-                  onChanged: (value) {
-                    viewModel.searchBooks(value);
-                  },
-                ),
-              ),
               const SizedBox(height: 32),
               _buildTodayBooks(),
               Padding(

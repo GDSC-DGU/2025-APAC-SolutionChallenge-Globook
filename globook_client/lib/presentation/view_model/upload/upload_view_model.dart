@@ -70,7 +70,7 @@ class UploadViewModel extends GetxController {
     }
 
     // 처리 중인 파일이 있는지 확인하고 폴링 시작
-    // _startPolling();
+    _startPolling();
   }
 
   void _startPolling() {
@@ -173,27 +173,32 @@ class UploadViewModel extends GetxController {
 
     _isUploading.value = true;
     try {
-      // 임시 파일 생성
+      // 임시 파일 생성 (uploading 상태)
       final tempFile = UserFile(
         id: _tempFileId,
         title: file.path.split('/').last,
         language: language,
-        fileStatus: FileStatus.processing,
+        fileStatus: FileStatus.uploading,
         createdAt: DateTime.now(),
       );
 
       // 임시 파일 추가
       _uploadedFile.insert(0, tempFile);
-      _fileStatusMap[_tempFileId] = FileStatus.processing;
+      _fileStatusMap[_tempFileId] = FileStatus.uploading;
       _lastCheckTime[_tempFileId] = DateTime.now();
 
-      // 폴링 시작
-      // _startPolling();
+      // 번역 시작 전에 processing 상태로 변경
+      _fileStatusMap[_tempFileId] = FileStatus.processing;
 
-      // 실제 업로드 진행
+      // 실제 번역 진행
       await _uploadUseCase.uploadFile(file, language, persona);
+
       if (!_isDisposed) {
-        loadFiles(); // 파일 목록 새로고침
+        // 파일 목록 새로고침
+        loadFiles();
+
+        // 상태 변경을 위한 폴링 시작
+        _startPolling();
       }
     } finally {
       if (!_isDisposed) {

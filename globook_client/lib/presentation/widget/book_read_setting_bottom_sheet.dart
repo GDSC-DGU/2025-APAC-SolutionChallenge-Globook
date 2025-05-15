@@ -340,14 +340,14 @@ class _BookReadSettingBottomSheetContentState
                         return;
                       }
 
+                      Get.back();
+
                       if (widget.isFromUpload) {
                         final file = await uploadViewModel.getFile();
                         if (file != null) {
                           await uploadViewModel.uploadFile(file, languageCode,
                               characters[selectedCharacterIdx!].name);
-                          Get.back();
                         }
-                        Navigator.pop(context);
                       } else {
                         if (widget.bookId == null) {
                           LogUtil.error('bookId is null');
@@ -357,7 +357,6 @@ class _BookReadSettingBottomSheetContentState
                               widget.bookId!,
                               languageCode,
                               characters[selectedCharacterIdx!].name);
-                          Navigator.pop(context);
                         }
                       }
                     }

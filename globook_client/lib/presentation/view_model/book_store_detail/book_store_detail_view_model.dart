@@ -6,6 +6,7 @@ import 'package:globook_client/domain/enum/EbookDownloadStatus.dart';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/usecase/book_store_detail/book_store_detail_usecase.dart';
 import 'package:globook_client/presentation/view_model/favorite/favorite_view_model.dart';
+import 'package:globook_client/presentation/view_model/storage/storage_view_model.dart';
 
 class BookStoreDetailViewModel extends GetxController {
   /* ------------------------------------------------------ */
@@ -114,9 +115,20 @@ class BookStoreDetailViewModel extends GetxController {
   void _startStatusCheckTimer() {
     _statusCheckTimer?.cancel();
     _statusCheckTimer =
-        Timer.periodic(const Duration(seconds: 2), (timer) async {
+        Timer.periodic(const Duration(seconds: 3), (timer) async {
       if (_currentBook.value != null) {
-        await _loadBookDetail(_currentBook.value!.id);
+        try {
+          final book = await _bookStoreDetailUseCase
+              .getBookStoreDetail(_currentBook.value!.id);
+          if (book.downloadStatus != _downloadStatus.value) {
+            _downloadStatus.value = book.downloadStatus;
+            if (book.downloadStatus != EbookDownloadStatus.downloading) {
+              _statusCheckTimer?.cancel();
+            }
+          }
+        } catch (e) {
+          print('Error checking download status: $e');
+        }
       }
     });
   }
@@ -144,18 +156,27 @@ class BookStoreDetailViewModel extends GetxController {
         _isFavorite.value = !_isFavorite.value;
       }
     }
-    favoriteViewModel.loadFiles();
+    favoriteViewModel.loadBooks();
   }
 
   Future<void> downloadBook(int bookId, String language, String persona) async {
     try {
+      // 즉시 상태를 downloading으로 변경
+      _downloadStatus.value = EbookDownloadStatus.downloading;
+      _startStatusCheckTimer();
+
       final isSuccess =
           await _bookStoreDetailUseCase.downloadBook(bookId, language, persona);
-      if (isSuccess) {
-        _downloadStatus.value = EbookDownloadStatus.downloading;
-        _startStatusCheckTimer();
+      if (!isSuccess) {
+        _downloadStatus.value = EbookDownloadStatus.download;
+      } else {
+        _downloadStatus.value = EbookDownloadStatus.read;
+        Get.find<StorageViewModel>().loadData();
       }
+      _statusCheckTimer?.cancel();
     } catch (e) {
+      _downloadStatus.value = EbookDownloadStatus.download;
+      _statusCheckTimer?.cancel();
       print('Error downloading book: $e');
     }
   }

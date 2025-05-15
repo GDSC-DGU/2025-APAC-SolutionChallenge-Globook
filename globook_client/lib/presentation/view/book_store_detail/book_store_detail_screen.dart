@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/app/config/color_system.dart';
-import 'package:globook_client/app/utility/log_util.dart';
 import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/domain/enum/EbookDownloadStatus.dart';
 import 'package:globook_client/presentation/view_model/book_store_detail/book_store_detail_view_model.dart';
