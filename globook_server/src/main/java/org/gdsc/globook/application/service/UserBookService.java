@@ -130,7 +130,7 @@ public class UserBookService {
             List<String> markdownSplitList = markdownSplitterPort.split(markdown);
 
             // Executor 한 번만 생성해서 재사용
-            ExecutorService executor = Executors.newFixedThreadPool(10); // 전체 병렬 처리용
+            ExecutorService executor = Executors.newFixedThreadPool(50); // 전체 병렬 처리용
 
             // 3. 분할된 마크다운에 대해 번역 (병렬 처리)
             List<CompletableFuture<String>> futuresTranslate = markdownSplitList.stream()
