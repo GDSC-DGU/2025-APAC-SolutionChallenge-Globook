@@ -13,24 +13,24 @@ import 'package:globook_client/presentation/view_model/root/root_view_model.dart
 import 'package:globook_client/presentation/view_model/storage/storage_view_model.dart';
 import 'package:globook_client/presentation/view_model/upload/upload_view_model.dart';
 
-class RootBinding extends Bindings {
+class InitialBinding extends Bindings {
   @override
   void dependencies() {
     // UseCase Dependency Injection
-    Get.put<LoginUseCase>(LoginUseCase());
-    Get.put<UploadUseCase>(UploadUseCase());
-    Get.put<StorageUsecase>(StorageUsecase());
-    Get.put<HomeUseCase>(HomeUseCase());
-    Get.put<BookStoreUseCase>(BookStoreUseCase());
-    Get.put<FavoriteUseCase>(FavoriteUseCase());
-    Get.put<ReaderUseCase>(ReaderUseCase());
+    Get.lazyPut<LoginUseCase>(() => LoginUseCase());
+    Get.lazyPut<UploadUseCase>(() => UploadUseCase());
+    Get.lazyPut<StorageUsecase>(() => StorageUsecase());
+    Get.lazyPut<HomeUseCase>(() => HomeUseCase());
+    Get.lazyPut<BookStoreUseCase>(() => BookStoreUseCase());
+    Get.lazyPut<FavoriteUseCase>(() => FavoriteUseCase());
+    Get.lazyPut<ReaderUseCase>(() => ReaderUseCase());
 
     // ViewModel Dependency Injection
-    Get.put<RootViewModel>(RootViewModel());
-    Get.put<UploadViewModel>(UploadViewModel());
-    Get.put<StorageViewModel>(StorageViewModel());
-    Get.put<HomeViewModel>(HomeViewModel());
-    Get.put<BookStoreViewModel>(BookStoreViewModel());
-    Get.put<FavoriteViewModel>(FavoriteViewModel());
+    Get.lazyPut<RootViewModel>(() => RootViewModel());
+    Get.lazyPut<UploadViewModel>(() => UploadViewModel());
+    Get.lazyPut<StorageViewModel>(() => StorageViewModel());
+    Get.lazyPut<HomeViewModel>(() => HomeViewModel());
+    Get.lazyPut<BookStoreViewModel>(() => BookStoreViewModel());
+    Get.lazyPut<FavoriteViewModel>(() => FavoriteViewModel());
   }
 }

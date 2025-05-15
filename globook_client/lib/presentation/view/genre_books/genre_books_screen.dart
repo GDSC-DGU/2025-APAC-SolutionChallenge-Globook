@@ -7,7 +7,7 @@ import 'package:globook_client/presentation/widget/search_field.dart';
 
 class GenreBooksScreen extends BaseScreen<GenreBooksViewModel> {
   const GenreBooksScreen({super.key});
-
+    
   @override
   Widget buildBody(BuildContext context) {
     return SingleChildScrollView(

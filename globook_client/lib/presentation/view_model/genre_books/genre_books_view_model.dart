@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:globook_client/domain/enum/EbookCategory.dart';
 import 'package:globook_client/domain/model/book.dart';
+import 'package:globook_client/presentation/view_model/book_store/book_store_view_model.dart';
 
 class GenreBooksViewModel extends GetxController {
   /* ------------------------------------------------------ */
@@ -50,37 +51,7 @@ class GenreBooksViewModel extends GetxController {
     try {
       // TODO: API 호출로 해당 장르의 도서 목록을 가져옵니다
       await Future.delayed(const Duration(milliseconds: 500)); // 임시 딜레이
-
-      // 임시 데이터로 테스트
-      _books.value = [
-        const Book(
-          id: 1,
-          title: '1984',
-          author: 'George Orwell',
-          imageUrl: 'https://example.com/1984.jpg',
-          description: 'A dystopian novel by George Orwell.',
-          category: EbookCategory.MYSTERY,
-          otherBookList: [],
-        ),
-        const Book(
-          id: 2,
-          title: 'Brave New World',
-          author: 'Aldous Huxley',
-          imageUrl: 'https://example.com/brave-new-world.jpg',
-          description: 'A dystopian novel by Aldous Huxley.',
-          category: EbookCategory.MYSTERY,
-          otherBookList: [],
-        ),
-        const Book(
-          id: 3,
-          title: 'Crime and Punishment',
-          author: 'Fyodor Dostoevsky',
-          imageUrl: 'https://example.com/crime-and-punishment.jpg',
-          description: 'A novel by Fyodor Dostoevsky.',
-          category: EbookCategory.MYSTERY,
-          otherBookList: [],
-        ),
-      ];
+      Get.find<BookStoreViewModel>().getBooksByCategory(EbookCategory.MYSTERY);
     } catch (e) {
       print('Error loading books: $e');
     } finally {

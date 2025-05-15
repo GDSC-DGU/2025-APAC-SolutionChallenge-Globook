@@ -32,16 +32,29 @@ class BookStatusButton extends BaseWidget<BookStoreDetailViewModel> {
           ? () => Get.snackbar("Downloading...", "Please wait...")
           : isDownload
               ? () => showDownloadBottomSheet()
-              : () {
-                  if (viewModel.currentBook != null) {
-                    LogUtil.debug(
-                        'BookStoreDetailScreen: _buildStatusButton - currentBook: ${viewModel.currentBook!.id}');
-                    Get.toNamed(
-                        '/reader/${viewModel.currentBook!.userBookId}/0/BOOK');
-                  } else {
-                    Get.snackbar("Error", "Book information is not available");
-                  }
-                },
+              : isRead
+                  ? () {
+                      if (viewModel.currentBook != null) {
+                        LogUtil.debug(
+                            'BookStoreDetailScreen: _buildStatusButton - currentBook: ${viewModel.currentBook!.id}');
+                        Get.toNamed(
+                            '/reader/${viewModel.currentBook!.userBookId}/0/BOOK');
+                      } else {
+                        Get.snackbar(
+                            "Error", "Book information is not available");
+                      }
+                    }
+                  : () {
+                      if (viewModel.currentBook != null) {
+                        LogUtil.debug(
+                            'BookStoreDetailScreen: _buildStatusButton - currentBook: ${viewModel.currentBook!.id}');
+                        Get.toNamed(
+                            '/reader/${viewModel.currentBook!.userBookId}/0/BOOK');
+                      } else {
+                        Get.snackbar(
+                            "Error", "Book information is not available");
+                      }
+                    },
       icon: Icon(
         isDownloading
             ? Icons.downloading

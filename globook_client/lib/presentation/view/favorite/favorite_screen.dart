@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:globook_client/app/config/color_system.dart';
+import 'package:globook_client/app/utility/log_util.dart';
 import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/data/factory/storage_factory.dart';
 import 'package:globook_client/domain/model/book.dart';
@@ -10,8 +11,9 @@ import 'package:globook_client/presentation/view/favorite/widgets/heart_button.d
 import 'package:globook_client/presentation/view_model/favorite/favorite_view_model.dart';
 import 'package:globook_client/presentation/widget/book_read_setting_bottom_sheet.dart';
 import 'package:globook_client/presentation/widget/book_status_button.dart';
-import 'package:globook_client/presentation/widget/styled_button.dart';
 import 'package:globook_client/app/config/app_routes.dart';
+import 'package:globook_client/presentation/widget/styled_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FavoriteScreen extends BaseScreen<FavoriteViewModel> {
   const FavoriteScreen({super.key});
@@ -28,6 +30,7 @@ class FavoriteScreen extends BaseScreen<FavoriteViewModel> {
           icon: const Icon(Icons.logout),
           onPressed: () async {
             await StorageFactory.systemProvider.deallocateTokens();
+            await _clearSharedPreferences();
             Get.offAllNamed(AppRoutes.LOGIN);
           },
         ),
@@ -35,24 +38,63 @@ class FavoriteScreen extends BaseScreen<FavoriteViewModel> {
     );
   }
 
+  Future<void> _clearSharedPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
+
   @override
   Widget buildBody(BuildContext context) {
     return Obx(
       () => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: viewModel.favoriteBooks.length,
-                itemBuilder: (context, index) {
-                  final book = viewModel.favoriteBooks[index];
-                  return _buildBookItem(context, book);
-                },
+        child: viewModel.favoriteBooks.isEmpty
+            ? _buildEmptyState()
+            : Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: viewModel.favoriteBooks.length,
+                      itemBuilder: (context, index) {
+                        final book = viewModel.favoriteBooks[index];
+                        return _buildBookItem(context, book);
+                      },
+                    ),
+                  ),
+                ],
               ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.favorite_border_outlined,
+            size: 80,
+            color: ColorSystem.light,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'There is no favorite book',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: ColorSystem.mainText,
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Add a book you like to your favorite',
+            style: TextStyle(
+              fontSize: 14,
+              color: ColorSystem.lightText,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -75,39 +117,24 @@ class FavoriteScreen extends BaseScreen<FavoriteViewModel> {
           ),
           HeartButton(book: book),
           const SizedBox(width: 8),
-          BookStatusButton(
-            context: context,
-            status: book.downloadStatus,
-            showDownloadBottomSheet: () {
-              _showDownloadBottomSheet(context, book);
-            },
-          ),
+          _readButton(book: book),
         ],
       ),
     );
   }
 
-  void _showDownloadBottomSheet(BuildContext context, Book book) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+  Widget _readButton({required Book book}) {
+    LogUtil.debug('FavoriteScreen: _readButton - book: ${book.id}');
+    return StyledButton(
+      backgroundColor: ColorSystem.highlight,
+      onPressed: () => Get.toNamed(
+        AppRoutes.BOOK_STORE_DETAIL,
+        arguments: book.id,
       ),
-      builder: (context) => DraggableScrollableSheet(
-        expand: false,
-        maxChildSize: 0.7,
-        minChildSize: 0.3,
-        initialChildSize: 0.5,
-        builder: (context, scrollController) => SingleChildScrollView(
-          controller: scrollController,
-          child: BookReadSettingBottomSheet(
-            isFromUpload: false,
-            bookId: book.id,
-          ),
-        ),
-      ),
+      icon: const Icon(Icons.chrome_reader_mode_outlined),
+      textColor: ColorSystem.white,
+      text: 'Read',
+      fontSize: 14,
     );
   }
 }

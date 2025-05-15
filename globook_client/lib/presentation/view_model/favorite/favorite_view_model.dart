@@ -1,6 +1,8 @@
 // lib/presentation/view_model/upload/upload_view_model.dart
 import 'dart:core';
+import 'dart:async';
 import 'package:get/get.dart';
+import 'package:globook_client/domain/enum/EbookDownloadStatus.dart';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/usecase/favorite/favorite_usecase.dart';
 
@@ -19,6 +21,7 @@ class FavoriteViewModel extends GetxController {
   /* ------------------------------------------------------ */
   final RxList<Book> _favoriteBooks = RxList<Book>();
   final RxString _searchQuery = RxString('');
+  Timer? _statusUpdateTimer;
 
   /* ------------------------------------------------------ */
   /* ----------------- Public Fields ---------------------- */
@@ -33,18 +36,18 @@ class FavoriteViewModel extends GetxController {
     _favoriteUseCase = Get.find<FavoriteUseCase>();
 
     // 초기 데이터 로드
-    loadFiles();
+    loadBooks();
   }
 
-  void loadFiles() async {
-    // 임시 데이터
+  void loadBooks() async {
+    // 즐겨찾기 도서 데이터 로드
     final response = await _favoriteUseCase.getFavoriteBooks();
     _favoriteBooks.value = response;
   }
 
   void searchFiles(String query) {
     if (query.isEmpty) {
-      loadFiles();
+      loadBooks();
       return;
     }
 
@@ -58,11 +61,11 @@ class FavoriteViewModel extends GetxController {
 
   Future<void> removeFavoriteBook(int bookId) async {
     await _favoriteUseCase.removeFavoriteBook(bookId);
-    loadFiles();
+    loadBooks();
   }
 
   Future<void> readBook(int bookId) async {
     await _favoriteUseCase.readBook(bookId);
-    loadFiles();
+    loadBooks();
   }
 }

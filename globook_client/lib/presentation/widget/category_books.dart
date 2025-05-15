@@ -36,8 +36,34 @@ class CategoryBooks extends StatelessWidget {
         children: [
           _buildHeader(),
           const SizedBox(height: 16),
-          _buildBookList(),
+          books.isEmpty ? _buildEmptyState() : _buildBookList(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return SizedBox(
+      height: height,
+      child: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.book_outlined,
+              size: 40,
+              color: ColorSystem.light,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'There is no book',
+              style: TextStyle(
+                fontSize: 14,
+                color: ColorSystem.lightText,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

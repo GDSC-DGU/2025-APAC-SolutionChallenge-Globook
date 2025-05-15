@@ -6,6 +6,7 @@ import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/app/config/color_system.dart';
 import 'package:globook_client/core/view/base_screen.dart';
 import 'package:globook_client/domain/enum/Efile.dart';
+import 'package:globook_client/domain/enum/EbookDownloadStatus.dart';
 import 'package:globook_client/domain/model/book.dart';
 import 'package:globook_client/domain/model/file.dart';
 import 'package:globook_client/presentation/view_model/root/root_view_model.dart';
@@ -16,21 +17,22 @@ class StorageScreen extends BaseScreen<StorageViewModel> {
   const StorageScreen({super.key});
 
   @override
+  PreferredSizeWidget? buildAppBar(BuildContext context) {
+    return AppBar(
+      title: const Text('Storage'),
+      centerTitle: true,
+      backgroundColor: Colors.transparent,
+    );
+  }
+
+  @override
   Widget buildBody(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 60.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '보관함',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 32),
             Obx(() => viewModel.isLoading
                 ? _buildLoadingSection('My files')
                 : _buildSection('My files', viewModel.myFiles)),
@@ -58,9 +60,9 @@ class StorageScreen extends BaseScreen<StorageViewModel> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            IconButton(
+            const IconButton(
               onPressed: null,
-              icon: const Icon(Icons.chevron_right),
+              icon: Icon(Icons.chevron_right),
             ),
           ],
         ),
@@ -139,8 +141,8 @@ class StorageScreen extends BaseScreen<StorageViewModel> {
                               : rootViewModel.changeIndex(3);
                         },
                         text: title == 'My files'
-                            ? 'Click the button below to add a file!'
-                            : 'Click the + button below to add a book!',
+                            ? 'Click the button to add a file!'
+                            : 'Click the button to read a book!',
                         textColor: ColorSystem.white,
                         backgroundColor: ColorSystem.highlight,
                       ),
@@ -230,7 +232,7 @@ class StorageScreen extends BaseScreen<StorageViewModel> {
 
   Widget _buildBookList() {
     return Obx(() {
-      final books = viewModel.books;
+      final books = viewModel.books.toList();
       return ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: books.length,
@@ -242,43 +244,50 @@ class StorageScreen extends BaseScreen<StorageViewModel> {
   }
 
   Widget _buildBookItem(Book book) {
-    return Container(
-      width: 92,
-      margin: const EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Container(
-              width: 80,
-              height: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                image: DecorationImage(
-                  image: NetworkImage(book.imageUrl),
-                  fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        viewModel.readBook(book.userBookId ?? 0);
+      },
+      child: Container(
+        width: 92,
+        margin: const EdgeInsets.only(right: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                width: 80,
+                height: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  image: DecorationImage(
+                    image: NetworkImage(book.imageUrl),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            book.title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 8),
+            Text(
+              book.title,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Text(
-            book.author,
-            style: const TextStyle(
-              fontSize: 12,
-              color: ColorSystem.lightText,
+            Text(
+              book.author,
+              style: const TextStyle(
+                fontSize: 12,
+                color: ColorSystem.lightText,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

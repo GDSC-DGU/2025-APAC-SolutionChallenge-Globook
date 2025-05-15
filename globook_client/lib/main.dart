@@ -6,7 +6,7 @@ import 'package:globook_client/app/config/app_pages.dart';
 import 'package:globook_client/app/config/app_routes.dart';
 import 'package:globook_client/app/env/common/environment_factory.dart';
 import 'package:globook_client/data/factory/storage_factory.dart';
-import 'package:globook_client/presentation/view_model/root/root_binding.dart';
+import 'package:globook_client/presentation/view_model/root/initial_binding.dart';
 
 void main() async {
   // Flutter Engine Reset
@@ -21,6 +21,8 @@ void main() async {
   // Storage Factory Initialize
   await StorageFactory.onInit();
   await StorageFactory.onReady();
+
+  AppDependency().dependencies();
 
   // Dependency Injection
   runApp(const MyApp());
@@ -38,7 +40,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       initialRoute: AppRoutes.SPLASH,
-      initialBinding: AppDependency(),
+      initialBinding: InitialBinding(),
       getPages: AppPages.pages,
     );
   }

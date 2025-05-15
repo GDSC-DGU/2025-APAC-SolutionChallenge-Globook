@@ -35,7 +35,7 @@ class CurrentParagraph extends StatelessWidget {
               Text(
                 _getTargetLanguageEmoji(paragraphsInfo.targetLanguage),
                 style: const TextStyle(
-                  fontSize: 40,
+                  fontSize: 32,
                   fontWeight: FontWeight.bold,
                   color: ColorSystem.highlight,
                 ),
@@ -43,8 +43,8 @@ class CurrentParagraph extends StatelessWidget {
               const SizedBox(width: 8),
               Image.asset(
                 _getPersonaImage(paragraphsInfo.persona),
-                width: 50,
-                height: 50,
+                width: 40,
+                height: 40,
               ),
             ],
           ),
@@ -68,10 +68,16 @@ class CurrentParagraph extends StatelessWidget {
                     'assets/icons/svg/pdf.svg',
                     fit: BoxFit.cover,
                   )
-                : Image.network(
-                    paragraphsInfo.imageUrl!,
-                    fit: BoxFit.cover,
-                  ),
+                : paragraphsInfo.id == -1
+                    ? const Icon(
+                        Icons.menu_book,
+                        size: 150,
+                        color: ColorSystem.lightText,
+                      )
+                    : Image.network(
+                        paragraphsInfo.imageUrl!,
+                        fit: BoxFit.cover,
+                      ),
           ),
           const SizedBox(height: 16),
           Text(
