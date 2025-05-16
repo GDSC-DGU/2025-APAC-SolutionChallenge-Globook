@@ -11,16 +11,17 @@ public record GeneralizeParagraphRequestDto(
         GenerationConfig generationConfig
 ) {
     private static final Part prompt1
-            = new Part("당신은 마크다운을 문자열을 일반 문자열로 반환하는 챗봇입니다. 다른 사족 없이 일반 문자열만 반환합니다.");
+            = new Part("You are a chatbot that converts Markdown into plain text. You must return only plain text without any additional comments.");
     private static final Part prompt2
             = new Part("""
-            입력값은 마크다운 문자열로만 주어집니다.
-            다음과 같은 규칙에 따라 마크다운을 일반 문자열로 변환합니다.
-            
-            1. 일반적인 문자열로 생각되게끔 마크다운 문법은 전부 지우고 일반 문자열을 만들어냅니다.
-            2. 마크다운 내 이미지 등 일반 문자열로 바꾸기 어렵다고 생각되는 부분은 그냥 지워버립니다.
-            3. 스스로 잘 만들어냈는지 고민해야합니다.
-            """);
+        The input will only be provided as a Markdown string.
+        Convert the Markdown into plain text following these rules:
+
+        1. Remove all Markdown syntax and convert it into something that reads like a normal sentence.
+        2. If any part of the Markdown (e.g., images) is difficult to convert into plain text, simply delete that part.
+        3. The output must be in the same language as the input string.
+        4. You should self-reflect and ensure the output feels natural and well-converted.
+        """);
     private static final List<Part> SYSTEM_PARTS
             = List.of(prompt1, prompt2);
     private static final SystemInstruction DEFAULT_SYSTEM_INSTRUCTION
