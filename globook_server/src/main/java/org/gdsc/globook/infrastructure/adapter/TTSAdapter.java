@@ -51,14 +51,19 @@ public class TTSAdapter implements TTSPort {
                 EPersona.valueOf(persona)
         );
 
-        TTSResponseDto ttsResponse = RetryUtils.retry(() ->
-                        ttsRestClient.post()
-                                .body(ttsRequestDto)
-                                .retrieve()
-                                .onStatus(HttpStatusCode::isError,
-                                        (req, res) -> new IllegalStateException("TTS 호출 실패: " + res.getStatusCode() + " 입력: " + ttsRequestDto.input()))
-                                .body(TTSResponseDto.class),
-                5, 1000, true);
+        TTSResponseDto ttsResponse = RetryUtils.retry(() -> {
+            TTSResponseDto response = ttsRestClient.post()
+                    .body(ttsRequestDto)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError,
+                            (req, res) -> new IllegalStateException("TTS 호출 실패: " + res.getStatusCode() + " 입력: " + ttsRequestDto.input()))
+                    .body(TTSResponseDto.class);
+
+            if (response.audioContent() == null) {
+                throw new IllegalStateException("TTS 응답에 audioContent가 null입니다. 입력: " + ttsRequestDto.input());
+            }
+            return response;
+        }, 5, 1000, true);
 
         if(ttsResponse.audioContent() == null) {
             log.info(ttsResponse.toString() + "입력 텍스트는 다음과 같아요 ------- " + inputText);
@@ -68,7 +73,7 @@ public class TTSAdapter implements TTSPort {
                     userId,
                     fileId,
                     Base64.getDecoder().decode(ttsResponse.audioContent()),
-                    "문단 번호" + paragraphId
+                    "paragraphNum" + paragraphId
             );
         }
     }
