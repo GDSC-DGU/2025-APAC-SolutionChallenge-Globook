@@ -1,12 +1,7 @@
 ### Introduce
 
-### ERD
-![스크린샷 2025-05-14 오후 4 58 17](https://github.com/user-attachments/assets/1b6d4b48-40bc-42d5-a5b7-077a869b1f33)
-
 ### Architecture
 ![image](https://github.com/user-attachments/assets/bde04b76-9681-4c79-ad05-10e1d13934bc)
-
-### Tech Stack
 
 ### Demo
 
